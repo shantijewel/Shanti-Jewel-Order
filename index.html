@@ -6,7 +6,38 @@
     <title>Jewelry Order Manager</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; padding-bottom: 80px; color: #333; }
-        .header { background: #8B735B; color: white; text-align: center; padding: 18px; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 18px; }
+        
+        /* Fixed Header with Logo */
+        .header { 
+            background: #8B735B; 
+            color: white; 
+            text-align: center; 
+            padding: 12px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .header-logo {
+            height: 40px;
+            width: 40px;
+            object-fit: contain;
+            border-radius: 6px;
+            background: white; /* Adds contrast if logo is dark */
+            padding: 2px;
+        }
+        .header-title {
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
         
         /* Bottom Navigation */
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
@@ -40,7 +71,13 @@
 </head>
 <body>
 
-<div class="header" id="headerTitle">Add New Order</div>
+<div class="header">
+    <div class="header-content">
+        <!-- Exact filename: logo.png -->
+        <img src="logo.png" class="header-logo" alt="Shop Logo" onerror="this.style.display='none'">
+        <span class="header-title" id="headerTitle">Add New Order</span>
+    </div>
+</div>
 
 <!-- PAGE 1: ADD ORDER -->
 <div id="addPage" class="page active">
@@ -150,9 +187,8 @@
         location.reload(); 
     }
 
-    // FUNCTION TO DELETE ORDER PERMANENTLY ON DELIVERY
     function deliverOrder(id) {
-        if(confirm("Confirm delivery? Order #" + id + " will be removed from the app.")) {
+        if(confirm("Confirm delivery? Order #" + id + " will be removed.")) {
             localStorage.removeItem('jw_' + id);
             renderOrders('all');
             renderOrders('due');
@@ -190,7 +226,7 @@
                                 <p><b>Party:</b> ${order.party}</p>
                                 <p><b>Weight:</b> ${order.weight} | <b>Karat:</b> ${order.karat}</p>
                                 <p><b>Due:</b> <span style="color:${mode==='due'?'#d9534f':'#333'}; font-weight:bold;">${order.delivery}</span></p>
-                                <button class="deliver-btn" onclick="deliverOrder('${order.id}')">✔️ DELIVERED (REMOVE)</button>
+                                <button class="deliver-btn" onclick="deliverOrder('${order.id}')">✔️ DELIVERED</button>
                             </div>
                         </div>
                     `;
