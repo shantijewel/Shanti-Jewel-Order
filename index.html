@@ -5,111 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shanti Jewel Orders</title>
     
-    <!-- Firebase Compatibility Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 90px; color: #333; }
-        .header { background: #8B735B; color: white; text-align: center; padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .header-title { font-weight: bold; font-size: 20px; text-transform: uppercase; letter-spacing: 1.5px; }
-        
-        /* Navigation Tabs */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; }
-        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.3s; }
-        .tab.active { color: #D4AF37; background: #fffcf5; border-top: 4px solid #D4AF37; }
-        .tab span:first-child { font-size: 24px; margin-bottom: 2px; }
-
-        /* Page Layout */
-        .page { display: none; padding: 15px; animation: fadeIn 0.4s ease; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding-bottom: 90px; color: #333; }
+        .header { background: #8B735B; color: white; text-align: center; padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header-title { font-weight: bold; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .tab.active { color: #D4AF37; border-top: 4px solid #D4AF37; background: #fffcf5; }
+        .tab span:first-child { font-size: 22px; margin-bottom: 3px; }
+        .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Form Styling */
-        .card { background: white; padding: 20px; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 12px; color: #8B735B; text-transform: uppercase; }
-        input, textarea { width: 100%; padding: 14px; margin-top: 6px; border: 1px solid #e0e0e0; border-radius: 12px; box-sizing: border-box; font-size: 16px; background: #fafafa; transition: 0.3s; }
-        input:focus { border-color: #D4AF37; outline: none; background: #fff; }
-
-        /* Photo Upload Box */
-        .photo-box { width: 100%; height: 200px; border: 2px dashed #D4AF37; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: #FFFDF5; margin-bottom: 10px; overflow: hidden; cursor: pointer; position: relative; }
+        .card { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        label { display: block; margin-top: 12px; font-weight: bold; font-size: 11px; color: #8B735B; text-transform: uppercase; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; background: #fdfdfd; }
+        .photo-box { width: 100%; height: 180px; border: 2px dashed #D4AF37; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #FFFDF5; margin-bottom: 10px; overflow: hidden; cursor: pointer; }
         #preview { width: 100%; height: 100%; object-fit: cover; display: none; }
-        #pText { color: #D4AF37; font-weight: bold; text-align: center; }
-
-        /* Order List Items */
-        .order-item { background: white; border-radius: 18px; padding: 15px; margin-bottom: 15px; border-left: 8px solid #D4AF37; display: flex; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); align-items: flex-start; }
-        .order-item img { width: 110px; height: 110px; border-radius: 12px; object-fit: cover; border: 1px solid #eee; }
-        .order-info { flex: 1; }
-        .order-info h3 { margin: 0 0 5px 0; font-size: 17px; color: #222; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .order-info p { margin: 4px 0; font-size: 14px; color: #555; line-height: 1.4; }
-        .deliver-btn { background: #2ecc71; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
-        .save-btn { background: #D4AF37; color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 18px; width: 100%; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3); }
-        
-        #loading { text-align: center; padding: 40px; color: #D4AF37; font-weight: bold; font-size: 18px; }
-        .search-bar { position: sticky; top: 75px; z-index: 90; background: #f8f9fa; padding: 10px 0; }
+        .order-item { background: white; border-radius: 15px; padding: 12px; margin-bottom: 12px; border-left: 6px solid #D4AF37; display: flex; gap: 12px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+        .order-item img { width: 90px; height: 90px; border-radius: 10px; object-fit: cover; }
+        .order-info { flex: 1; min-width: 0; }
+        .order-info h3 { margin: 0; font-size: 15px; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .order-info p { margin: 3px 0; font-size: 13px; color: #555; }
+        .deliver-btn { background: #4CAF50; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; }
+        .save-btn { background: #D4AF37; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 17px; width: 100%; margin-top: 15px; cursor: pointer; transition: 0.2s; }
+        .save-btn:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="header-title" id="headerTitle">Shanti Jewel Orders</div>
-</div>
+<div class="header"><div class="header-title" id="headerTitle">Add New Order</div></div>
 
-<!-- PAGE 1: ADD ORDER -->
 <div id="addPage" class="page active">
     <div class="card">
         <div class="photo-box" onclick="document.getElementById('cam').click()">
-            <span id="pText">📸 TAP TO CHOOSE PHOTO<br><small>(Gallery or Camera)</small></span>
+            <span id="pText">📸 SELECT PHOTO</span>
             <img id="preview">
         </div>
-        <input type="file" id="cam" accept="image/*" style="display:none" onchange="loadImg(event)">
+        <input type="file" id="cam" accept="image/*" style="display:none" onchange="loadAndCompress(event)">
         
-        <label>Order ID / Bill No.</label>
-        <input type="text" id="orderId" placeholder="Ex: 501">
-        
-        <label>Customer / Party Name</label>
-        <input type="text" id="party" placeholder="Enter name">
-        
+        <label>Bill Number / Order ID</label>
+        <input type="text" id="orderId" placeholder="Ex: 101">
+        <label>Party Name</label>
+        <input type="text" id="party" placeholder="Customer Name">
         <div style="display:flex; gap:10px;">
             <div style="flex:1"><label>Karat</label><input type="text" id="karat" placeholder="22k"></div>
-            <div style="flex:1"><label>Weight (g)</label><input type="text" id="weight" placeholder="0.00g"></div>
+            <div style="flex:1"><label>Weight</label><input type="text" id="weight" placeholder="0.00g"></div>
         </div>
-        
         <div style="display:flex; gap:10px;">
-            <div style="flex:1"><label>Size</label><input type="text" id="size" placeholder="18"></div>
-            <div style="flex:1"><label>Delivery Date</label><input type="date" id="date"></div>
+            <div style="flex:1"><label>Size</label><input type="text" id="size"></div>
+            <div style="flex:1"><label>Delivery</label><input type="date" id="date"></div>
         </div>
-        
-        <label>Specifications / Design Details</label>
-        <textarea id="specs" rows="3" placeholder="Describe the design, hook type, etc."></textarea>
-        
-        <button class="save-btn" id="saveBtn" onclick="saveOrder()">🚀 SAVE TO CLOUD</button>
+        <label>Specifications</label>
+        <textarea id="specs" rows="2" placeholder="Ex: Special hand engraving..."></textarea>
+        <button class="save-btn" id="saveBtn" onclick="saveOrder()">SAVE TO CLOUD</button>
     </div>
 </div>
 
-<!-- PAGE 2: PENDING LIST -->
 <div id="listPage" class="page">
-    <div class="search-bar">
-        <input type="text" id="searchAll" placeholder="🔍 Search Name or Bill ID..." onkeyup="renderOrders()">
-    </div>
-    <div id="loading">Connecting to Shanti Cloud...</div>
+    <input type="text" id="searchAll" placeholder="🔍 Search..." onkeyup="renderOrders()" style="margin-bottom:12px;">
     <div id="allOrderList"></div>
 </div>
 
-<!-- PAGE 3: DUE SOON -->
 <div id="duePage" class="page">
     <div id="dueOrderList"></div>
 </div>
 
-<!-- BOTTOM NAVIGATION -->
 <div class="tab-bar">
     <div class="tab active" onclick="switchTab('add', this)"><span>✚</span><span>NEW</span></div>
     <div class="tab" onclick="switchTab('list', this)"><span>📋</span><span>PENDING</span></div>
-    <div class="tab" onclick="switchTab('due', this)"><span>⏳</span><span>DUE SOON</span></div>
+    <div class="tab" onclick="switchTab('due', this)"><span>🕒</span><span>DUE</span></div>
 </div>
 
 <script>
-    // --- FIREBASE SETUP ---
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -117,7 +86,6 @@
         storageBucket: "shanti-jewel-order.firebasestorage.app",
         messagingSenderId: "382209058715",
         appId: "1:382209058715:web:44566a9efb13c452ad633e",
-        measurementId: "G-66H504R107",
         databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/"
     };
 
@@ -125,153 +93,107 @@
     const db = firebase.database();
     let imgData = "";
 
-    // Switch between Tabs
     function switchTab(tab, el) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
-        
-        if(tab === 'add') {
-            document.getElementById('addPage').classList.add('active');
-            document.getElementById('headerTitle').innerText = "New Order";
-        } else if(tab === 'list') {
-            document.getElementById('listPage').classList.add('active');
-            document.getElementById('headerTitle').innerText = "Pending Orders";
-            renderOrders();
-        } else {
-            document.getElementById('duePage').classList.add('active');
-            document.getElementById('headerTitle').innerText = "Due Soon";
-            renderOrders();
-        }
+        document.getElementById(tab + 'Page').classList.add('active');
+        document.getElementById('headerTitle').innerText = tab === 'add' ? "Add New Order" : (tab === 'list' ? "Pending" : "Due Soon");
+        if(tab !== 'add') renderOrders();
     }
 
-    // Process Image (and compress for faster sync)
-    function loadImg(e) {
+    // --- NEW: SPEEDY IMAGE COMPRESSION ---
+    function loadAndCompress(e) {
         const file = e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 500; 
-                let width = img.width;
-                let height = img.height;
-                if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
-                else { if (height > MAX_WIDTH) { width *= MAX_WIDTH / height; height = MAX_WIDTH; } }
-                canvas.width = width; canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-                imgData = canvas.toDataURL("image/jpeg", 0.7);
+                let width = 400; // Resize to 400px width
+                let scaleFactor = width / img.width;
+                canvas.width = width;
+                canvas.height = img.height * scaleFactor;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                // Compress to 60% quality JPEG (very small size)
+                imgData = canvas.toDataURL('image/jpeg', 0.6);
                 document.getElementById('preview').src = imgData;
                 document.getElementById('preview').style.display = 'block';
                 document.getElementById('pText').style.display = 'none';
-            };
-            img.src = reader.result;
+            }
+            img.src = event.target.result;
         }
         reader.readAsDataURL(file);
     }
 
-    // Save Order to Firebase
     function saveOrder() {
         const id = document.getElementById('orderId').value;
         const party = document.getElementById('party').value;
         const date = document.getElementById('date').value;
         const saveBtn = document.getElementById('saveBtn');
 
-        if(!id || !party || !date) return alert("❌ Missing Info: Please fill Bill ID, Name, and Date.");
+        if(!id || !party || !date) return alert("Fill ID, Name, and Date!");
         
-        saveBtn.innerText = "UPDATING CLOUD...";
+        saveBtn.innerText = "UPLOADING...";
         saveBtn.disabled = true;
 
-        const orderData = {
-            id: id,
-            party: party,
-            karat: document.getElementById('karat').value || "N/A",
-            weight: document.getElementById('weight').value || "N/A",
-            size: document.getElementById('size').value || "N/A",
-            delivery: date,
-            specs: document.getElementById('specs').value || "No specs",
-            photo: imgData,
-            timestamp: Date.now()
+        const order = {
+            id, party, karat: document.getElementById('karat').value,
+            weight: document.getElementById('weight').value,
+            size: document.getElementById('size').value,
+            delivery: date, specs: document.getElementById('specs').value,
+            photo: imgData, ts: Date.now()
         };
 
-        db.ref('orders/' + id).set(orderData).then(() => {
-            alert("✅ Order #" + id + " saved successfully!");
-            location.reload();
-        }).catch(err => {
-            alert("❌ Cloud Error: " + err.message);
-            saveBtn.disabled = false;
-            saveBtn.innerText = "SAVE TO CLOUD";
-        });
+        // Faster update method
+        db.ref('orders/' + id).set(order)
+            .then(() => {
+                alert("Saved!");
+                location.reload();
+            })
+            .catch(err => {
+                alert("Error: " + err.message);
+                saveBtn.disabled = false;
+                saveBtn.innerText = "SAVE TO CLOUD";
+            });
     }
 
-    // Delete/Deliver Order
     function deliverOrder(id) {
-        if(confirm("Mark Order #" + id + " as Delivered? This will remove it from the list.")) {
-            db.ref('orders/' + id).remove();
-        }
+        if(confirm("Delivered?")) db.ref('orders/' + id).remove();
     }
 
-    // Fetch and Display Orders
     function renderOrders() {
         const search = document.getElementById('searchAll').value.toLowerCase();
-        const listDiv = document.getElementById('allOrderList');
-        const dueDiv = document.getElementById('dueOrderList');
-        const loading = document.getElementById('loading');
+        db.ref('orders').on('value', (snap) => {
+            const list = document.getElementById('allOrderList');
+            const due = document.getElementById('dueOrderList');
+            list.innerHTML = ""; due.innerHTML = "";
+            const data = snap.val();
+            if(!data) return;
 
-        db.ref('orders').on('value', (snapshot) => {
-            if(loading) loading.style.display = 'none';
-            listDiv.innerHTML = "";
-            dueDiv.innerHTML = "";
-            
-            const data = snapshot.val();
-            if(!data) {
-                const emptyMsg = "<p style='text-align:center; color:#999; margin-top:50px;'>No pending orders found.</p>";
-                listDiv.innerHTML = emptyMsg;
-                dueDiv.innerHTML = emptyMsg;
-                return;
-            }
-
-            const now = new Date();
-            const urgentDate = new Date();
-            urgentDate.setDate(now.getDate() + 2); // Show anything due within 2 days
-
-            // Sort by delivery date
-            const sortedOrders = Object.values(data).sort((a, b) => new Date(a.delivery) - new Date(b.delivery));
-
-            sortedOrders.forEach(order => {
-                const deliveryDate = new Date(order.delivery);
-                const isDueSoon = deliveryDate <= urgentDate;
-                
-                const cardHtml = `
-                    <div class="order-item">
-                        <img src="${order.photo || 'https://via.placeholder.com/150?text=No+Photo'}" onclick="window.open(this.src)">
-                        <div class="order-info">
-                            <h3>#${order.id} | ${order.party}</h3>
-                            <p><b>Weight:</b> ${order.weight} | <b>Karat:</b> ${order.karat}</p>
-                            <p><b>Size:</b> ${order.size} | <b>Specs:</b> ${order.specs}</p>
-                            <p><b>Delivery:</b> <span style="color:#d9534f; font-weight:bold;">${order.delivery}</span></p>
-                            <button class="deliver-btn" onclick="deliverOrder('${order.id}')">✔️ MARK DELIVERED</button>
-                        </div>
+            Object.values(data).reverse().forEach(o => {
+                const html = `
+                <div class="order-item">
+                    <img src="${o.photo || 'https://via.placeholder.com/90'}">
+                    <div class="order-info">
+                        <h3>#${o.id} | ${o.party}</h3>
+                        <p><b>Wt:</b> ${o.weight} | <b>K:</b> ${o.karat} | <b>Sz:</b> ${o.size}</p>
+                        <p><b>Due:</b> <span style="color:red;font-weight:bold">${o.delivery}</span></p>
+                        <button class="deliver-btn" onclick="deliverOrder('${o.id}')">DONE</button>
                     </div>
-                `;
-
-                // Add to Pending List if matches search
-                if(order.party.toLowerCase().includes(search) || order.id.toLowerCase().includes(search)) {
-                    listDiv.innerHTML += cardHtml;
-                }
-
-                // Add to Due Soon List
-                if(isDueSoon) {
-                    dueDiv.innerHTML += cardHtml;
-                }
+                </div>`;
+                if(o.party.toLowerCase().includes(search) || o.id.includes(search)) list.innerHTML += html;
+                const dDate = new Date(o.delivery);
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                if(dDate <= today.setDate(today.getDate() + 2)) due.innerHTML += html;
             });
         });
     }
-
-    // Initialize list on load
     window.onload = renderOrders;
 </script>
-
 </body>
 </html>
+
