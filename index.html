@@ -4,155 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jewelry Order Manager</title>
-   <link rel="apple-touch-icon" href="logo.png">
-<link rel="icon" href="logo.png"> <style>
+    <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; padding-bottom: 80px; color: #333; }
-        
-        /* Fixed Header with Logo */
-        .header { 
-            background: #8B735B; 
-            color: white; 
-            text-align: center; 
-            padding: 12px; 
-            position: sticky; 
-            top: 0; 
-            z-index: 100; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
-        }
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        .header-logo {
-            height: 40px;
-            width: 40px;
-            object-fit: contain;
-            border-radius: 6px;
-            background: white; /* Adds contrast if logo is dark */
-            padding: 2px;
-        }
-        .header-title {
-            font-weight: bold;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        /* Bottom Navigation */
+        .header { background: #8B735B; color: white; text-align: center; padding: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .header-content { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .header-logo { height: 40px; width: 40px; object-fit: contain; border-radius: 6px; background: white; padding: 2px; }
+        .header-title { font-weight: bold; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; font-size: 12px; font-weight: 600; }
         .tab.active { color: #D4AF37; border-top: 4px solid #D4AF37; background: #fffcf5; }
         .tab span:first-child { font-size: 22px; margin-bottom: 3px; }
-        
         .page { display: none; padding: 15px; animation: slideUp 0.3s ease-out; }
         .page.active { display: block; }
         @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* Form Styling */
         .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         label { display: block; margin-top: 12px; font-weight: bold; font-size: 13px; color: #777; text-transform: uppercase; }
         input, textarea { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; background: #fdfdfd; }
-        input:focus { border-color: #D4AF37; outline: none; }
-        
         .photo-box { width: 100%; height: 180px; border: 2px dashed #D4AF37; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #FFFDF5; margin-bottom: 15px; overflow: hidden; cursor: pointer; }
         #preview { width: 100%; height: 100%; object-fit: cover; display: none; }
-
-        /* Order List Items */
-        .order-item { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 6px solid #D4AF37; display: flex; gap: 15px; position: relative; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+        .order-item { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 6px solid #D4AF37; display: flex; gap: 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
         .order-item img { width: 100px; height: 100px; border-radius: 10px; object-fit: cover; border: 1px solid #eee; }
         .order-info { flex: 1; }
         .order-info h3 { margin: 0; font-size: 16px; color: #222; margin-bottom: 5px; }
         .order-info p { margin: 4px 0; font-size: 14px; color: #555; line-height: 1.4; }
-        
         .deliver-btn { background: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
-        .save-btn { background: #D4AF37; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 100%; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3); }
+        .save-btn { background: #D4AF37; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 100%; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="header-content">
-        <!-- Exact filename: logo.png -->
-        <img src="logo.png" class="header-logo" alt="Shop Logo" onerror="this.style.display='none'">
+        <img src="logo.png" class="header-logo" alt="Logo" onerror="this.style.display='none'">
         <span class="header-title" id="headerTitle">Add New Order</span>
     </div>
 </div>
 
-<!-- PAGE 1: ADD ORDER -->
 <div id="addPage" class="page active">
     <div class="card">
         <div class="photo-box" onclick="document.getElementById('cam').click()">
-            <span id="pText">📸 TAP TO CAPTURE PHOTO</span>
+            <span id="pText">📸 TAP TO SELECT PHOTO</span>
             <img id="preview">
         </div>
+        <!-- REMOVED capture="camera" to allow gallery access -->
         <input type="file" id="cam" accept="image/*" style="display:none" onchange="loadImg(event)">
 
         <label>Order ID / Bill No.</label>
         <input type="text" id="orderId" placeholder="Ex: 501">
-        
         <label>Party Name</label>
         <input type="text" id="party" placeholder="Customer Name">
-        
         <div style="display:flex; gap:10px;">
             <div style="flex:1"><label>Karat</label><input type="text" id="karat" placeholder="22k"></div>
             <div style="flex:1"><label>Weight</label><input type="text" id="weight" placeholder="0.00g"></div>
         </div>
-
         <div style="display:flex; gap:10px;">
             <div style="flex:1"><label>Size</label><input type="text" id="size"></div>
             <div style="flex:1"><label>Delivery Date</label><input type="date" id="date"></div>
         </div>
-
         <label>Specifications</label>
         <textarea id="specs" rows="2" placeholder="Design details..."></textarea>
-
         <button class="save-btn" onclick="saveOrder()">SAVE TO LIST</button>
     </div>
 </div>
 
-<!-- PAGE 2: VIEW ALL PENDING -->
 <div id="listPage" class="page">
-    <input type="text" id="searchAll" placeholder="🔍 Search by ID or Name..." onkeyup="renderOrders('all')" style="margin-bottom:15px; border:2px solid #D4AF37; border-radius:10px; width:100%; box-sizing:border-box; padding:12px;">
+    <input type="text" id="searchAll" placeholder="🔍 Search ID or Name..." onkeyup="renderOrders('all')" style="margin-bottom:15px; border:2px solid #D4AF37; border-radius:10px; width:100%; box-sizing:border-box; padding:12px;">
     <div id="allOrderList"></div>
 </div>
 
-<!-- PAGE 3: DUE WITHIN 24 HOURS -->
 <div id="duePage" class="page">
-    <div style="background:#fffcf0; padding:12px; border-radius:10px; margin-bottom:15px; font-size:14px; color:#b8860b; border:1px solid #fcebb6; text-align:center; font-weight:bold;">
-        🕒 Orders Due Today or Tomorrow
-    </div>
     <div id="dueOrderList"></div>
 </div>
 
-<!-- BOTTOM NAVIGATION -->
 <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('add', this)"><span>➕</span><span>ADD NEW</span></div>
+    <div class="tab active" onclick="switchTab('add', this)"><span>➕</span><span>ADD</span></div>
     <div class="tab" onclick="switchTab('list', this)"><span>📋</span><span>PENDING</span></div>
-    <div class="tab" onclick="switchTab('due', this)"><span>🕒</span><span>DUE SOON</span></div>
+    <div class="tab" onclick="switchTab('due', this)"><span>🕒</span><span>DUE</span></div>
 </div>
 
 <script>
     let imgData = "";
-
     function switchTab(tab, el) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
-        
-        if(tab === 'add') {
-            document.getElementById('addPage').classList.add('active');
-            document.getElementById('headerTitle').innerText = "Add New Order";
-        } else if(tab === 'list') {
-            document.getElementById('listPage').classList.add('active');
-            document.getElementById('headerTitle').innerText = "Pending Orders";
-            renderOrders('all');
-        } else {
-            document.getElementById('duePage').classList.add('active');
-            document.getElementById('headerTitle').innerText = "Urgent Deliveries";
-            renderOrders('due');
-        }
+        if(tab === 'add') { document.getElementById('addPage').classList.add('active'); document.getElementById('headerTitle').innerText = "Add New Order"; }
+        else if(tab === 'list') { document.getElementById('listPage').classList.add('active'); document.getElementById('headerTitle').innerText = "Pending Orders"; renderOrders('all'); }
+        else { document.getElementById('duePage').classList.add('active'); document.getElementById('headerTitle').innerText = "Urgent Deliveries"; renderOrders('due'); }
     }
 
     function loadImg(e) {
@@ -171,28 +109,20 @@
         const party = document.getElementById('party').value;
         const dateStr = document.getElementById('date').value;
         if(!id || !party || !dateStr) return alert("Fill ID, Party Name and Date!");
-
         const order = {
-            id: id,
-            party: party,
-            karat: document.getElementById('karat').value,
-            weight: document.getElementById('weight').value,
-            size: document.getElementById('size').value,
-            specs: document.getElementById('specs').value,
-            delivery: dateStr,
-            photo: imgData
+            id: id, party: party, karat: document.getElementById('karat').value,
+            weight: document.getElementById('weight').value, size: document.getElementById('size').value,
+            specs: document.getElementById('specs').value, delivery: dateStr, photo: imgData
         };
-
         localStorage.setItem('jw_' + id, JSON.stringify(order));
-        alert("Order #" + id + " Added Successfully!");
+        alert("Order #" + id + " Saved!");
         location.reload(); 
     }
 
     function deliverOrder(id) {
-        if(confirm("Confirm delivery? Order #" + id + " will be removed.")) {
+        if(confirm("Confirm delivery for #" + id + "?")) {
             localStorage.removeItem('jw_' + id);
             renderOrders('all');
-            renderOrders('due');
         }
     }
 
@@ -201,7 +131,6 @@
         const container = document.getElementById(listId);
         const search = document.getElementById('searchAll').value.toLowerCase();
         container.innerHTML = "";
-
         const now = new Date();
         const tomorrow = new Date();
         tomorrow.setDate(now.getDate() + 1);
@@ -210,7 +139,6 @@
             if(key.startsWith('jw_')) {
                 const order = JSON.parse(localStorage.getItem(key));
                 const deliveryDate = new Date(order.delivery);
-                
                 let shouldShow = false;
                 if(mode === 'all') {
                     if(order.id.toLowerCase().includes(search) || order.party.toLowerCase().includes(search)) shouldShow = true;
@@ -225,8 +153,9 @@
                             <div class="order-info">
                                 <h3>ID: ${order.id}</h3>
                                 <p><b>Party:</b> ${order.party}</p>
-                                <p><b>Weight:</b> ${order.weight} | <b>Karat:</b> ${order.karat}</p>
-                                <p><b>Due:</b> <span style="color:${mode==='due'?'#d9534f':'#333'}; font-weight:bold;">${order.delivery}</span></p>
+                                <p><b>Wt:</b> ${order.weight} | <b>K:</b> ${order.karat} | <b>Size:</b> ${order.size || 'N/A'}</p>
+                                <p><b>Specs:</b> ${order.specs || 'No details'}</p>
+                                <p><b>Due:</b> <span style="color:#d9534f; font-weight:bold;">${order.delivery}</span></p>
                                 <button class="deliver-btn" onclick="deliverOrder('${order.id}')">✔️ DELIVERED</button>
                             </div>
                         </div>
@@ -234,9 +163,8 @@
                 }
             }
         });
-        if(container.innerHTML === "") container.innerHTML = "<p style='text-align:center; color:#999; margin-top:30px;'>No pending orders.</p>";
+        if(container.innerHTML === "") container.innerHTML = "<p style='text-align:center; color:#999; margin-top:30px;'>No orders found.</p>";
     }
 </script>
-
 </body>
 </html>
