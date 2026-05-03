@@ -6,81 +6,97 @@
     <title>Shanti Jewel ERP</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #8B735B; --bg: #f4f7f6; --green: #2ecc71; --grey: #bdc3c7; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
+        :root { --gold: #D4AF37; --brown: #5d4037; --red: #b22222; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
         
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; font-weight: bold; font-size: 1.2em; }
-        
-        /* Progress Line for Pending Orders */
-        .progress-line { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-size: 9px; font-weight: bold; color: var(--grey); }
-        .p-step { position: relative; }
-        .p-step.active { color: var(--gold); }
-        .p-step.done { color: var(--green); }
-
-        /* Multi-Image Slot */
-        .upload-slot { border: 2px dashed var(--gold); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #fff9e6; }
-        .preview-strip { display: flex; gap: 5px; margin-top: 10px; overflow-x: auto; }
-        .preview-strip img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
-
+        .header { background: var(--brown); color: white; text-align: center; padding: 18px; font-weight: bold; letter-spacing: 1px; }
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        input, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         
-        .order-item { background: white; border-radius: 12px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .order-flex { display: flex; gap: 12px; }
-        .order-flex img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; z-index: 1000; }
-        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; }
-        .tab.active { color: var(--gold); border-top: 3px solid var(--gold); }
+        /* THE RED CAD FORM FOR FREELANCERS - NO PARTY NAME */
+        #cadCanvas { background: white; width: 500px; padding: 30px; position: fixed; left: -5000px; border: 15px solid var(--red); color: var(--red); }
+        .cad-header { text-align: center; border-bottom: 4px solid var(--red); padding-bottom: 10px; margin-bottom: 20px; }
+        .cad-imgs { display: flex; gap: 10px; justify-content: center; margin: 25px 0; }
+        .cad-imgs img { height: 180px; width: 180px; object-fit: cover; border: 2px solid var(--red); border-radius: 5px; }
+        .cad-data { font-size: 22px; font-weight: bold; line-height: 1.6; }
 
-        .btn-share { background: #25D366; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        input, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .btn-gold { background: var(--gold); color: white; }
+        .btn-red { background: var(--red); color: white; }
+        
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
+        .tab { flex: 1; text-align: center; padding: 25px 10px; font-size: 12px; font-weight: bold; color: #999; cursor: pointer; }
+        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); }
+        
+        .workflow-row { display: flex; gap: 5px; margin: 10px 0; overflow-x: auto; padding-bottom: 5px; }
+        .workflow-step { font-size: 9px; padding: 4px 8px; border-radius: 3px; white-space: nowrap; }
     </style>
 </head>
 <body>
 
-<div class="header">SHANTI JEWEL</div>
+<div class="header">SHANTI JEWEL ERP</div>
 
-<!-- PAGE: PUNCH NEW -->
+<!-- NEW ORDER PAGE -->
 <div id="addPage" class="page active">
     <div class="card">
-        <h3 style="margin-top:0; color:var(--brown)">New Order Entry</h3>
-        <div class="upload-slot" onclick="document.getElementById('imageInput').click()">
-            <div id="uploadPlaceholder">📸 <b>TAP TO ADD IMAGES</b><br><small>You can select up to 3 photos</small></div>
-            <div id="imgPreviewStrip" class="preview-strip"></div>
+        <h3 id="nextIdLabel" style="color:var(--red); margin:0;">NEXT ORDER ID: ...</h3>
+        <div id="uploadBox" style="border:2px dashed #ccc; padding:20px; text-align:center; margin-top:10px;" onclick="document.getElementById('fileIn').click()">
+            <span id="upMsg">UPLOAD DESIGN PHOTOS (MAX 3)</span>
+            <div id="previews" style="display:flex; gap:5px; justify-content:center; margin-top:10px;"></div>
         </div>
-        <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="processImages(event)">
+        <input type="file" id="fileIn" multiple accept="image/*" style="display:none" onchange="previewImages(event)">
         
-        <input type="text" id="orderId" placeholder="Order / Bill Number">
-        <input type="text" id="party" placeholder="Party Name">
+        <input type="text" id="party" placeholder="CUSTOMER NAME">
         <div style="display:flex; gap:10px;">
-            <input type="text" id="weight" placeholder="Weight">
-            <input type="text" id="size" placeholder="Size">
+            <input type="text" id="weight" placeholder="WEIGHT IN GRAMS">
+            <input type="text" id="size" placeholder="SIZE">
         </div>
-        <input type="date" id="dueDate" placeholder="Delivery Date">
-        <textarea id="specs" rows="3" placeholder="Diamonds, Metal Purity, Polish type..."></textarea>
-        
-        <button onclick="saveOrder()" style="background:var(--gold); color:white; border:none; width:100%; padding:15px; margin-top:15px; border-radius:8px; font-weight:bold; font-size:16px;">PUNCH TO WORKFLOW</button>
+        <input type="date" id="delDate">
+        <textarea id="specs" placeholder="DETAILED INSTRUCTIONS FOR CAD WORKER"></textarea>
+        <button class="btn btn-gold" onclick="saveOrder()">PUNCH ORDER</button>
     </div>
 </div>
 
-<!-- PAGE: PENDING LIST -->
-<div id="listPage" class="page">
-    <div style="margin-bottom:15px;">
-        <input type="text" id="search" placeholder="🔍 Search Party or Order ID..." onkeyup="renderPending()">
+<!-- WORKFLOW PAGE -->
+<div id="statusPage" class="page">
+    <div id="statusList"></div>
+</div>
+
+<!-- ALL ORDERS PAGE (RENAMED ARCHIVE) -->
+<div id="infoPage" class="page">
+    <div id="infoList"></div>
+</div>
+
+<!-- THE HIDDEN CAD FORM DESIGN (NO PARTY NAME HERE) -->
+<div id="cadCanvas">
+    <div class="cad-header">
+        <h1 style="font-size:45px; margin:0;">SHANTI JEWEL</h1>
+        <p style="letter-spacing:10px; font-size:18px; margin:5px 0;">ORDER FORM</p>
     </div>
-    <div id="pendingContainer"></div>
+    <div id="cadImgBox" class="cad-imgs"></div>
+    <div class="cad-data">
+        <span style="font-size:30px;">JOB ID: #<span id="cId"></span></span><br>
+        WEIGHT: <span id="cWt"></span>G | SIZE: <span id="cSz"></span><br>
+        DELIVERY DATE: <span id="cDate"></span><br>
+        <div style="margin-top:15px; border-top:2px solid var(--red); padding-top:10px;">
+            INSTRUCTIONS:<br>
+            <span id="cSpecs" style="font-weight:normal;"></span>
+        </div>
+    </div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('add', this)"><span>➕</span>NEW</div>
-    <div class="tab" onclick="switchTab('list', this)"><span>📦</span>PENDING ORDERS</div>
+    <div class="tab active" onclick="nav('add', this)">NEW</div>
+    <div class="tab" onclick="nav('status', this)">WORKFLOW</div>
+    <div class="tab" onclick="nav('info', this)">ALL ORDERS</div>
 </div>
 
 <script>
-    // Config same as before
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -90,121 +106,110 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let tempImages = [];
-    const stages = ["CAD", "CAM", "Casting", "Polishing", "HUID", "Ready"];
+    let currentImgs = [];
+    let nextOrderNum = 100;
+    const flow = ["CAD", "CAM", "CASTING", "POLISHING", "HUID", "READY"];
 
-    function switchTab(p, el) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById(p + 'Page').classList.add('active');
-        if(p === 'list') renderPending();
-    }
-
-    async function processImages(e) {
-        const files = Array.from(e.target.files).slice(0, 3);
-        const strip = document.getElementById('imgPreviewStrip');
-        const placeholder = document.getElementById('uploadPlaceholder');
-        strip.innerHTML = "";
-        tempImages = [];
-
-        for (let f of files) {
-            const base64 = await compress(f);
-            tempImages.push(base64);
-            const img = document.createElement('img');
-            img.src = base64;
-            strip.appendChild(img);
-        }
-        placeholder.innerHTML = `✅ ${tempImages.length} Images Loaded`;
-    }
-
-    function compress(file) {
-        return new Promise(res => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const scale = 600 / img.width;
-                    canvas.width = 600; canvas.height = img.height * scale;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    res(canvas.toDataURL('image/jpeg', 0.8));
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+    function getNextId() {
+        db.ref('orders').limitToLast(1).once('value', (snap) => {
+            if (snap.exists()) {
+                const lastOrder = Object.values(snap.val())[0];
+                nextOrderNum = parseInt(lastOrder.id) + 1;
+            }
+            document.getElementById('nextIdLabel').innerText = "NEXT ORDER ID: #" + nextOrderNum;
         });
+    }
+    getNextId();
+
+    function previewImages(e) {
+        const files = Array.from(e.target.files).slice(0, 3);
+        currentImgs = [];
+        const container = document.getElementById('previews');
+        container.innerHTML = "";
+        files.forEach(f => {
+            const reader = new FileReader();
+            reader.onload = (rs) => {
+                currentImgs.push(rs.target.result);
+                container.innerHTML += `<img src="${rs.target.result}" style="width:50px; height:50px; border-radius:5px; object-fit:cover;">`;
+            };
+            reader.readAsDataURL(f);
+        });
+        document.getElementById('upMsg').innerText = files.length + " IMAGES LOADED";
+    }
+
+    function nav(page, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(page + 'Page').classList.add('active');
+        el.classList.add('active');
+        if(page === 'status' || page === 'info') render();
     }
 
     function saveOrder() {
-        const id = document.getElementById('orderId').value;
         const party = document.getElementById('party').value;
-        const due = document.getElementById('dueDate').value;
-        if(!id || !party || !due) return alert("Missing ID, Party or Due Date");
-
-        const order = {
-            id, party, due,
-            weight: document.getElementById('weight').value,
-            size: document.getElementById('size').value,
-            specs: document.getElementById('specs').value,
-            photos: tempImages,
-            status: "CAD",
-            ts: Date.now()
-        };
-
-        db.ref('orders/' + id).set(order).then(() => {
-            alert("Order Punched!");
-            location.reload();
-        });
+        if(!party || currentImgs.length === 0) return alert("ENTER DETAILS AND PHOTOS");
+        
+        const newId = nextOrderNum.toString();
+        db.ref('orders/' + newId).set({
+            id: newId, party, weight: document.getElementById('weight').value,
+            size: document.getElementById('size').value, date: document.getElementById('delDate').value,
+            specs: document.getElementById('specs').value, imgs: currentImgs, status: "CAD", ts: Date.now()
+        }).then(() => { alert("ORDER SAVED"); location.reload(); });
     }
 
-    function renderPending() {
-        const search = document.getElementById('search').value.toLowerCase();
-        db.ref('orders').on('value', snap => {
-            const container = document.getElementById('pendingContainer');
-            container.innerHTML = "";
-            let data = Object.values(snap.val() || {});
-            
-            // SORT BY DUE DATE (Soonest at top)
-            data.sort((a,b) => new Date(a.due) - new Date(b.due));
+    function render() {
+        db.ref('orders').on('value', (snap) => {
+            const data = snap.val();
+            const sList = document.getElementById('statusList');
+            const iList = document.getElementById('infoList');
+            sList.innerHTML = ""; iList.innerHTML = "";
+            if(!data) return;
 
-            data.forEach(o => {
-                if(o.party.toLowerCase().includes(search) || o.id.includes(search)) {
-                    const card = document.createElement('div');
-                    card.className = 'order-item';
-                    
-                    // Generate Progress Line HTML
-                    let progressHtml = stages.map(s => {
-                        let cls = (s === o.status) ? 'active' : (stages.indexOf(s) < stages.indexOf(o.status) ? 'done' : '');
-                        let icon = cls === 'done' ? '✓' : '';
-                        return `<span class="p-step ${cls}">${icon}${s}</span>`;
-                    }).join(' ➔ ');
+            Object.values(data).reverse().forEach(o => {
+                let steps = flow.map(s => `<div class="workflow-step" style="background:${o.status===s?'#D4AF37':'#eee'}; color:${o.status===s?'white':'#999'};">${s}</div>`).join(' > ');
+                
+                sList.innerHTML += `<div class="card">
+                    <b>ID: #${o.id} | ${o.party}</b>
+                    <div class="workflow-row">${steps}</div>
+                    <button class="btn btn-red" onclick="downloadCAD('${o.id}')">DOWNLOAD CAD FORM</button>
+                    <button class="btn btn-gold" onclick="updateStatus('${o.id}', '${o.status}')">MOVE NEXT STAGE</button>
+                </div>`;
 
-                    card.innerHTML = `
-                        <div class="order-flex">
-                            <img src="${o.photos[0] || ''}">
-                            <div style="flex:1">
-                                <h4 style="margin:0">#${o.id} - ${o.party}</h4>
-                                <small><b>Due:</b> ${o.due} | <b>Wt:</b> ${o.weight}</small><br>
-                                <small><b>Size:</b> ${o.size}</small>
-                            </div>
-                        </div>
-                        <div class="progress-line">${progressHtml}</div>
-                        <button class="btn-share" onclick="shareOrder('${o.id}')">SEND ORDER FORM</button>
-                    `;
-                    container.appendChild(card);
-                }
+                iList.innerHTML += `<div class="card">
+                    <h3>ID: #${o.id} | ${o.party}</h3>
+                    <p>WEIGHT: ${o.weight}G | SIZE: ${o.size} | DUE: ${o.date}</p>
+                    <div style="display:flex; gap:5px; overflow-x:auto;">
+                        ${o.imgs.map(img => `<img src="${img}" style="height:80px; border-radius:5px;">`).join('')}
+                    </div>
+                </div>`;
             });
         });
     }
 
-    function shareOrder(id) {
-        db.ref('orders/' + id).once('value', snap => {
+    function updateStatus(id, current) {
+        const nextIdx = flow.indexOf(current) + 1;
+        if(nextIdx >= flow.length) return alert("ORDER READY");
+        if(confirm("MOVE TO " + flow[nextIdx] + "?")) {
+            db.ref('orders/' + id).update({status: flow[nextIdx]});
+        }
+    }
+
+    function downloadCAD(id) {
+        db.ref('orders/' + id).once('value', (snap) => {
             const o = snap.val();
-            const msg = `*SHANTI JEWEL - ORDER FORM*%0A--------------------------%0A*ID:* ${o.id}%0A*PARTY:* ${o.party}%0A*WEIGHT:* ${o.weight}%0A*SIZE:* ${o.size}%0A*SPECS:* ${o.specs}%0A*DUE:* ${o.due}%0A--------------------------%0A_Image attached below_`;
-            // Note: Direct image sharing via web URL is restricted, so we send the data 
-            // and the sales person can attach the screenshot if needed.
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
+            document.getElementById('cId').innerText = o.id;
+            document.getElementById('cWt').innerText = o.weight;
+            document.getElementById('cSz').innerText = o.size;
+            document.getElementById('cDate').innerText = o.date;
+            document.getElementById('cSpecs').innerText = o.specs;
+            document.getElementById('cadImgBox').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
+
+            html2canvas(document.querySelector("#cadCanvas"), { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `CAD_JOB_${o.id}.jpg`;
+                link.href = canvas.toDataURL("image/jpeg", 1.0);
+                link.click();
+            });
         });
     }
 </script>
