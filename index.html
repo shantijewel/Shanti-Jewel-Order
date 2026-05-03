@@ -236,7 +236,7 @@
 
     function wipeDatabase() {
         const pass = prompt("Admin Password:");
-        if(pass === "1234") {
+        if(pass === "2215") {
             if(confirm("Delete ALL data?")) {
                 db.ref('orders').remove().then(() => { alert("Database Cleared."); location.reload(); });
             }
