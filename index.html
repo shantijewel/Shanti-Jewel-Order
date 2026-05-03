@@ -3,39 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHANTI JEWEL ORDER PORTAL</title>
+    <title>SHANTI JEWEL PRECISION PORTAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #4e342e; --red: #d32f2f; --bg: #f4f4f4; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+        :root { --gold: #D4AF37; --brown: #4e342e; --red: #d32f2f; --bg: #ffffff; }
+        body { font-family: 'Arial', sans-serif; background: #f0f0f0; margin: 0; padding-bottom: 90px; }
         
+        /* Layout Components */
         .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 4px solid var(--gold); }
         .logo-main { font-size: 24px; font-weight: bold; margin: 0; }
         .logo-sub { font-size: 12px; letter-spacing: 4px; color: var(--gold); }
 
-        .page { display: none; padding: 12px; }
+        .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        .card { background: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        /* A4 PORTRAIT RED FORM */
-        #cadCanvas { background: white; width: 794px; min-height: 1123px; padding: 40px; position: fixed; left: -9999px; border: 20px solid var(--red); color: var(--red); box-sizing: border-box; }
-        .cad-header { text-align: center; border-bottom: 4px solid var(--red); padding-bottom: 15px; margin-bottom: 30px; }
-        .cad-imgs { display: flex; flex-direction: column; gap: 15px; align-items: center; margin-bottom: 30px; }
-        .cad-imgs img { width: 85%; border: 3px solid var(--red); border-radius: 10px; }
-        .cad-row { display: flex; justify-content: space-between; font-size: 24px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ffcccc; }
+        /* Red Order Slip (A4 Portrait) */
+        #cadCanvas { background: white; width: 794px; min-height: 1123px; padding: 40px; position: fixed; left: -9999px; border: 25px solid var(--red); color: var(--red); box-sizing: border-box; }
+        .cad-header { text-align: center; border-bottom: 5px solid var(--red); padding-bottom: 20px; margin-bottom: 30px; }
+        .cad-imgs img { width: 90%; border: 4px solid var(--red); border-radius: 10px; margin-bottom: 20px; }
+        .cad-row { display: flex; justify-content: space-between; font-size: 28px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #ffcccc; }
 
-        input, select, textarea { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
-        .search-bar { background: #fff; position: sticky; top: 0; z-index: 10; padding: 5px 0; margin-bottom: 10px; }
-        .btn { padding: 14px; border: none; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; font-size: 14px; margin-top: 8px; text-transform: uppercase; }
+        /* UI Elements */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+        .search-container { position: sticky; top: 0; background: #f0f0f0; padding: 10px 0; z-index: 10; }
+        .btn { padding: 15px; border: none; border-radius: 5px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 10px; }
         .btn-gold { background: var(--gold); color: white; }
         .btn-red { background: var(--red); color: white; }
         
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 2px solid #ddd; height: 65px; }
-        .tab { flex: 1; text-align: center; padding: 15px; font-size: 11px; font-weight: bold; color: #888; text-decoration: none; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 2px solid #ddd; height: 70px; }
+        .tab { flex: 1; text-align: center; padding: 20px; font-size: 12px; font-weight: bold; color: #888; text-decoration: none; border-top: 4px solid transparent; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); }
-        .thumb { width: 70px; height: 70px; object-fit: cover; border-radius: 5px; border: 1px solid #eee; margin-right: 12px; }
+        .list-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 1px solid #eee; margin-right: 15px; }
     </style>
 </head>
 <body>
@@ -45,90 +46,88 @@
     <div class="logo-sub">ORDER FORM</div>
 </div>
 
-<!-- 1. PUNCH PAGE -->
-<div id="addPage" class="page active">
+<!-- PAGE 1: PUNCH -->
+<div id="punchPage" class="page active">
     <div class="card">
-        <h3 id="cadIdTitle" style="color:var(--red); text-align:center; margin:0 0 10px 0;">CAD ID: #...</h3>
-        <div style="border:2px dashed var(--gold); padding:20px; text-align:center; border-radius:8px; cursor:pointer;" onclick="document.getElementById('fileIn').click()">
-            <span id="upMsg" style="font-weight:bold;">📸 UPLOAD PHOTO</span>
-            <div id="previews" style="display:flex; gap:8px; justify-content:center; margin-top:10px;"></div>
+        <h2 id="nextCadDisplay" style="color:var(--red); text-align:center;">CAD ID: #...</h2>
+        <div style="border:2px dashed var(--gold); padding:25px; text-align:center; border-radius:10px; cursor:pointer;" onclick="document.getElementById('fileInput').click()">
+            <span id="uploadLabel">📸 UPLOAD PHOTO</span>
+            <div id="imgPreviewArea" style="display:flex; gap:10px; justify-content:center; margin-top:10px;"></div>
         </div>
-        <input type="file" id="fileIn" multiple accept="image/*" style="display:none" onchange="handleFiles(event)">
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleImageSelection(event)">
         
-        <input type="text" id="custIn" placeholder="Customer Order No.">
-        <input type="text" id="partyIn" placeholder="Party Name">
+        <input type="text" id="inCustNo" placeholder="Customer Order No.">
+        <input type="text" id="inParty" placeholder="Customer Name">
         
-        <select id="catIn">
-            <option value="">Select Item Category</option>
+        <select id="inCat">
+            <option value="">Select Category</option>
             <option>RING</option><option>EARRING</option><option>BRACLET</option>
             <option>KADA</option><option>NECKLACE</option><option>PENDANT</option>
             <option>ORNAMENTS</option>
         </select>
 
-        <div style="display:flex; gap:8px;">
-            <input type="text" id="purIn" placeholder="Purity">
-            <input type="number" id="pcsIn" placeholder="Pcs">
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="inPur" placeholder="Purity">
+            <input type="number" id="inPcs" placeholder="Pcs">
         </div>
         
-        <div style="display:flex; gap:8px;">
-            <input type="text" id="wtIn" placeholder="Net Wt (g)">
-            <input type="text" id="szIn" placeholder="Size">
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="inWt" placeholder="Net Wt (g)">
+            <input type="text" id="inSize" placeholder="Size">
         </div>
 
-        <select id="wrkIn">
+        <select id="inWorker">
             <option value="">Select CAD Worker</option>
             <option>ALAUDIN</option><option>CHETAN SHINDE</option><option>DYE</option>
         </select>
 
-        <textarea id="spcIn" rows="2" placeholder="Design Specs..."></textarea>
-        <button class="btn btn-gold" onclick="punch()">PUNCH ORDER</button>
+        <textarea id="inSpecs" rows="3" placeholder="Additional Specs..."></textarea>
+        <button class="btn btn-gold" onclick="submitOrder()">PUNCH ORDER</button>
     </div>
 </div>
 
-<!-- 2. WORKFLOW PAGE -->
-<div id="statusPage" class="page">
-    <div id="workflowList"></div>
+<!-- PAGE 2: WORKFLOW -->
+<div id="workflowPage" class="page">
+    <div id="workflowContainer"></div>
 </div>
 
-<!-- 3. ALL ORDERS PAGE (With Search) -->
-<div id="infoPage" class="page">
-    <div class="search-bar">
-        <input type="text" id="orderSearch" placeholder="🔍 Search Customer Order No..." onkeyup="filterOrders()">
+<!-- PAGE 3: ALL ORDERS (With Search) -->
+<div id="allOrdersPage" class="page">
+    <div class="search-container">
+        <input type="text" id="searchBox" placeholder="🔍 Search Order Number..." onkeyup="runSearch()">
     </div>
-    <div id="allOrdersList"></div>
+    <div id="allOrdersContainer"></div>
 </div>
 
-<!-- HIDDEN A4 CANVAS -->
+<!-- HIDDEN A4 TEMPLATE -->
 <div id="cadCanvas">
     <div class="cad-header">
-        <h1 style="font-size:65px; margin:0;">SHANTI JEWEL</h1>
-        <p style="letter-spacing:12px; font-size:22px; margin:8px 0; font-weight:bold;">ORDER FORM</p>
+        <h1 style="font-size:70px; margin:0;">SHANTI JEWEL</h1>
+        <p style="letter-spacing:15px; font-size:24px; margin:10px 0; font-weight:bold;">ORDER FORM</p>
     </div>
-    <div id="canvasImgBox" class="cad-imgs"></div>
-    <div>
-        <div style="font-size:40px; border-bottom: 4px solid var(--red); margin-bottom:20px; display:inline-block;">
-            CAD ID: #<span id="outId"></span>
-        </div>
-        <div class="cad-row"><span>CATEGORY:</span> <span id="outCat"></span></div>
-        <div class="cad-row"><span>PURITY:</span> <span id="outPur"></span></div>
-        <div class="cad-row"><span>NET WT:</span> <span id="outWt"></span>g</div>
-        <div class="cad-row"><span>PCS:</span> <span id="outPcs"></span></div>
-        <div class="cad-row"><span>SIZE:</span> <span id="outSz"></span></div>
-        <div class="cad-row"><span>CAD WORKER:</span> <span id="outWrk"></span></div>
-        <div style="margin-top:25px; border:2px solid var(--red); padding:15px; font-size:24px;">
-            <b>SPECS:</b> <span id="outSpc"></span>
-        </div>
+    <div id="canvasImgContainer" style="text-align:center; margin-bottom:30px;"></div>
+    <div style="font-size:45px; border-bottom: 5px solid var(--red); margin-bottom:30px; display:inline-block;">
+        CAD ID: #<span id="outCadId"></span>
+    </div>
+    <div class="cad-row"><span>CATEGORY:</span> <span id="outCat"></span></div>
+    <div class="cad-row"><span>PURITY:</span> <span id="outPur"></span></div>
+    <div class="cad-row"><span>NET WT:</span> <span id="outWt"></span>g</div>
+    <div class="cad-row"><span>PCS:</span> <span id="outPcs"></span></div>
+    <div class="cad-row"><span>SIZE:</span> <span id="outSize"></span></div>
+    <div class="cad-row"><span>WORKER:</span> <span id="outWorker"></span></div>
+    <div style="margin-top:30px; border:3px solid var(--red); padding:20px; font-size:26px;">
+        <b>SPECS:</b> <span id="outSpecs"></span>
     </div>
 </div>
 
 <div class="tab-bar">
-    <a href="#" class="tab active" onclick="nav('add', this)">PUNCH</a>
-    <a href="#" class="tab" onclick="nav('status', this)">WORKFLOW</a>
-    <a href="#" class="tab" onclick="nav('info', this)">ALL ORDERS</a>
+    <div class="tab active" onclick="showTab('punch', this)">PUNCH</div>
+    <div class="tab" onclick="showTab('workflow', this)">WORKFLOW</div>
+    <div class="tab" onclick="showTab('allOrders', this)">ALL ORDERS</div>
 </div>
 
 <script>
-    // Firebase Setup[cite: 1]
+    // Exact Firebase Config for Shanti Jewel Order
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -138,134 +137,144 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let currentImgs = [];
-    let nextId = 100;
-    let allOrdersData = [];
+    let tempImages = [];
+    let nextCadId = 100;
+    let globalOrderList = [];
 
-    function syncId() {
+    // Fetch the correct Next CAD ID on load
+    function initialize() {
         db.ref('orders').limitToLast(1).once('value', (snap) => {
             if (snap.exists()) {
-                const last = Object.values(snap.val())[0];
-                nextId = (parseInt(last.cadId) || 99) + 1;
+                const lastEntry = Object.values(snap.val())[0];
+                nextCadId = parseInt(lastEntry.cadId) + 1;
             }
-            document.getElementById('cadIdTitle').innerText = "CAD ID: #" + nextId;
+            document.getElementById('nextCadDisplay').innerText = "CAD ID: #" + nextCadId;
         });
     }
-    syncId();
+    initialize();
 
-    function handleFiles(e) {
+    function handleImageSelection(e) {
         const files = Array.from(e.target.files).slice(0, 3);
-        currentImgs = [];
-        const pre = document.getElementById('previews');
-        pre.innerHTML = "";
-        files.forEach(f => {
+        tempImages = [];
+        const previewArea = document.getElementById('imgPreviewArea');
+        previewArea.innerHTML = "";
+        files.forEach(file => {
             const reader = new FileReader();
-            reader.onload = (r) => {
-                currentImgs.push(r.target.result);
-                pre.innerHTML += `<img src="${r.target.result}" style="width:45px; height:45px; border-radius:4px; object-fit:cover;">`;
+            reader.onload = (event) => {
+                tempImages.push(event.target.result);
+                previewArea.innerHTML += `<img src="${event.target.result}" style="width:50px; height:50px; border-radius:5px; object-fit:cover;">`;
             };
-            reader.readAsDataURL(f);
+            reader.readAsDataURL(file);
         });
     }
 
-    function punch() {
-        const custNo = document.getElementById('custIn').value;
-        if(!custNo || currentImgs.length === 0) return alert("Missing Order No or Photos");
-        const cid = nextId.toString();
-        db.ref('orders/' + cid).set({
-            cadId: cid,
-            custOrderNo: custNo,
-            party: document.getElementById('partyIn').value,
-            category: document.getElementById('catIn').value,
-            purity: document.getElementById('purIn').value,
-            pcs: document.getElementById('pcsIn').value,
-            ntwt: document.getElementById('wtIn').value,
-            size: document.getElementById('szIn').value,
-            worker: document.getElementById('wrkIn').value,
-            specs: document.getElementById('spcIn').value,
-            imgs: currentImgs,
-            status: "CAD"
-        }).then(() => { alert("Punched!"); location.reload(); });
+    function submitOrder() {
+        const cNo = document.getElementById('inCustNo').value;
+        if(!cNo || tempImages.length === 0) return alert("Please enter Order No and add Photos.");
+        
+        const orderData = {
+            cadId: nextCadId.toString(),
+            custOrderNo: cNo,
+            party: document.getElementById('inParty').value || "N/A",
+            category: document.getElementById('inCat').value || "N/A",
+            purity: document.getElementById('inPur').value || "N/A",
+            pcs: document.getElementById('inPcs').value || "0",
+            ntwt: document.getElementById('inWt').value || "0",
+            size: document.getElementById('inSize').value || "N/A",
+            worker: document.getElementById('inWorker').value || "N/A",
+            specs: document.getElementById('inSpecs').value || "No special instructions.",
+            images: tempImages
+        };
+
+        db.ref('orders/' + nextCadId).set(orderData).then(() => {
+            alert("Order Punched Successfully!");
+            location.reload();
+        });
     }
 
-    function nav(p, el) {
-        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+    function showTab(tabId, element) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(p + 'Page').classList.add('active');
-        el.classList.add('active');
-        if(p !== 'add') fetchData();
+        document.getElementById(tabId + 'Page').classList.add('active');
+        element.classList.add('active');
+        if(tabId !== 'punch') loadOrders();
     }
 
-    function fetchData() {
-        db.ref('orders').on('value', (s) => {
-            const data = s.val();
+    function loadOrders() {
+        db.ref('orders').on('value', (snap) => {
+            const data = snap.val();
             if(!data) return;
-            allOrdersData = Object.values(data).reverse();
-            renderLists(allOrdersData);
+            globalOrderList = Object.values(data).reverse();
+            renderLists(globalOrderList);
         });
     }
 
-    function renderLists(items) {
-        const wfL = document.getElementById('workflowList');
-        const aiL = document.getElementById('allOrdersList');
-        wfL.innerHTML = ""; aiL.innerHTML = "";
+    function renderLists(list) {
+        const wfBox = document.getElementById('workflowContainer');
+        const allBox = document.getElementById('allOrdersContainer');
+        wfBox.innerHTML = ""; allBox.innerHTML = "";
 
-        items.forEach(o => {
-            // WORKFLOW LIST[cite: 1]
-            wfL.innerHTML += `<div class="card" style="display:flex; align-items:center;">
-                <img src="${o.imgs ? o.imgs[0] : ''}" class="thumb">
-                <div style="flex:1">
-                    <b>CAD #${o.cadId} | CUST #${o.custOrderNo || 'N/A'}</b><br>
-                    <small>${o.category || ''} | ${o.worker || ''}</small>
-                    <button class="btn btn-red" style="padding:6px; font-size:11px;" onclick="exportA4('${o.cadId}')">EXPORT RED FORM</button>
-                </div>
-            </div>`;
-
-            // ALL ORDERS LIST[cite: 1]
-            aiL.innerHTML += `<div class="card" onclick="alert('Instructions: ${o.specs}')">
-                <div style="display:flex; align-items:center;">
-                    <img src="${o.imgs ? o.imgs[0] : ''}" class="thumb">
+        list.forEach(o => {
+            // Workflow Tab - High Precision Visibility
+            wfBox.innerHTML += `
+                <div class="card" style="display:flex; align-items:center;">
+                    <img src="${o.images ? o.images[0] : ''}" class="list-img">
                     <div style="flex:1">
-                        <div style="display:flex; justify-content:space-between;">
-                             <b>CUST: ${o.custOrderNo}</b>
-                             <b style="color:var(--red);">CAD: #${o.cadId}</b>
-                        </div>
-                        <p style="margin:5px 0; font-size:13px; color:#555;">${o.party} | ${o.category} | ${o.ntwt}g</p>
-                        <small style="color:var(--gold);">VIEW FULL SPECS</small>
+                        <b style="font-size:16px;">CAD #${o.cadId} | CUST #${o.custOrderNo}</b><br>
+                        <span style="color:#666;">${o.category} | ${o.worker}</span>
+                        <button class="btn btn-red" style="padding:8px; font-size:12px; margin-top:5px;" onclick="downloadA4('${o.cadId}')">DOWNLOAD RED FORM</button>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
+
+            // All Orders Tab - Full Information Page
+            allBox.innerHTML += `
+                <div class="card" onclick="alert('FULL SPECS:\\n${o.specs}')">
+                    <div style="display:flex; align-items:center;">
+                        <img src="${o.images ? o.images[0] : ''}" class="list-img">
+                        <div style="flex:1">
+                            <div style="display:flex; justify-content:space-between;">
+                                <b>CUST NO: ${o.custOrderNo}</b>
+                                <b style="color:var(--red);">CAD: #${o.cadId}</b>
+                            </div>
+                            <p style="margin:5px 0; font-size:14px; color:#444;">${o.party} | ${o.category} | ${o.ntwt}g | ${o.purity}</p>
+                            <small style="color:var(--gold); font-weight:bold;">CLICK TO VIEW ALL INFORMATION</small>
+                        </div>
+                    </div>
+                </div>`;
         });
     }
 
-    function filterOrders() {
-        const val = document.getElementById('orderSearch').value.toLowerCase();
-        const filtered = allOrdersData.filter(o => 
-            (o.custOrderNo && o.custOrderNo.toLowerCase().includes(val)) || 
-            (o.cadId && o.cadId.includes(val))
+    function runSearch() {
+        const query = document.getElementById('searchBox').value.toLowerCase();
+        const filtered = globalOrderList.filter(o => 
+            o.custOrderNo.toLowerCase().includes(query) || 
+            o.cadId.includes(query)
         );
         renderLists(filtered);
     }
 
-    function exportA4(id) {
-        db.ref('orders/' + id).once('value', (s) => {
-            const o = s.val();
-            document.getElementById('outId').innerText = o.cadId;
-            document.getElementById('outCat').innerText = o.category;
-            document.getElementById('outPur').innerText = o.purity;
-            document.getElementById('outWt').innerText = o.ntwt;
-            document.getElementById('outPcs').innerText = o.pcs;
-            document.getElementById('outSz').innerText = o.size;
-            document.getElementById('outWrk').innerText = o.worker;
-            document.getElementById('outSpc').innerText = o.specs;
-            document.getElementById('canvasImgBox').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
+    function downloadA4(id) {
+        const order = globalOrderList.find(x => x.cadId === id);
+        if(!order) return;
 
-            html2canvas(document.querySelector("#cadCanvas"), { scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `SJ_Order_${o.cadId}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
-                link.click();
-            });
+        // Fill Portrait Template[cite: 1]
+        document.getElementById('outCadId').innerText = order.cadId;
+        document.getElementById('outCat').innerText = order.category;
+        document.getElementById('outPur').innerText = order.purity;
+        document.getElementById('outWt').innerText = order.ntwt;
+        document.getElementById('outPcs').innerText = order.pcs;
+        document.getElementById('outSize').innerText = order.size;
+        document.getElementById('outWorker').innerText = order.worker;
+        document.getElementById('outSpecs').innerText = order.specs;
+        
+        const imgContainer = document.getElementById('canvasImgContainer');
+        imgContainer.innerHTML = order.images.map(src => `<img src="${src}" style="width:90%; border:4px solid var(--red); margin-bottom:15px;">`).join('');
+
+        html2canvas(document.querySelector("#cadCanvas"), { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `SJ_Order_CAD_${order.cadId}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg", 0.95);
+            link.click();
         });
     }
 </script>
