@@ -99,8 +99,8 @@
             <option value="INHOUSE">INHOUSE</option>
         </select>
         <div style="display:flex; gap:10px;">
-            <input type="number" step="0.001" id="i_wt" placeholder="Weight (gms)">
-            <input type="number" id="i_sz" placeholder="Size (NO.)">
+            <input type="number" step="0.001" id="i_wt" placeholder="Weight (e.g. 10.5)">
+            <input type="number" id="i_sz" placeholder="Size (e.g. 12)">
         </div>
         <select id="i_cad">
             <option value="">Select CAD Worker</option>
@@ -126,7 +126,6 @@
         <input type="password" id="wipeoutPass" placeholder="••••" maxlength="4" style="width:100px; letter-spacing:4px; text-align:center;">
         <button class="btn btn-gold" style="margin-top:15px; width:150px;" onclick="unlockWipeout()">UNLOCK</button>
     </div>
-
     <div id="wipeoutContent" style="display:none;">
         <div class="stats-banner">
             <div><b id="totalHandWt">0.000</b><span>In Hand (gms)</span></div>
@@ -148,6 +147,7 @@
     </div>
 </div>
 
+<!-- HIDDEN PRODUCTION CARD CANVAS -->
 <div id="formCanvas">
     <div class="canvas-header">
         <span class="canvas-shree">IIश्रीII</span>
@@ -156,8 +156,7 @@
     </div>
     <div id="c_imgs" class="canvas-grid"></div>
     <table class="canvas-table">
-        <tr><td><b>ORDER ID:</b></td><td id="c_id" style="color:var(--brown); font-weight:bold;"></td></tr>
-        <tr><td><b>PARTY:</b></td><td id="c_pa"></td></tr>
+        <!-- ORDER ID AND PARTY NAME REMOVED FROM HERE -->
         <tr><td><b>WEIGHT:</b></td><td id="c_wt"></td></tr>
         <tr><td><b>SIZE:</b></td><td id="c_sz"></td></tr>
         <tr><td><b>CAD BY:</b></td><td id="c_cad"></td></tr>
@@ -177,7 +176,6 @@
     function checkPass() { if(document.getElementById('passInput').value === '1008') { document.getElementById('loginOverlay').style.display = 'none'; loadOrders(); } else { alert("Incorrect"); } }
     function unlockWipeout() { if(document.getElementById('wipeoutPass').value === '2215') { document.getElementById('wipeoutLock').style.display = 'none'; document.getElementById('wipeoutContent').style.display = 'block'; } else { alert("Wrong Password"); } }
     function lockDashboard() { document.getElementById('wipeoutLock').style.display = 'block'; document.getElementById('wipeoutContent').style.display = 'none'; document.getElementById('wipeoutPass').value = ""; }
-    
     function wipeAllData() { if(confirm("DANGER: Wipe all data?")) { db.ref('orders').remove().then(() => { location.reload(); }); } }
 
     const firebaseConfig = { apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU", authDomain: "shanti-jewel-order.firebaseapp.com", projectId: "shanti-jewel-order", databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/" };
@@ -204,16 +202,14 @@
         reader.readAsDataURL(input.files[0]);
     }
 
-    // UPDATED SAVE LOGIC - FORCES FORMATTING TO DATABASE
     function saveOrder() {
         const id = document.getElementById('i_id').value;
         const weightInput = document.getElementById('i_wt').value;
         const sizeInput = document.getElementById('i_sz').value;
         const valid = photoData.filter(p => p !== null);
-        
         if(!id || valid.length === 0) return alert("ID & Photos Required");
 
-        const finalWeight = weightInput ? parseFloat(weightInput).toFixed(3) : "0.000";
+        const finalWeight = weightInput ? parseFloat(weightInput).toFixed(3) + " gms" : "0.000 gms";
         const finalSize = sizeInput ? sizeInput + " NO." : "-";
 
         db.ref('orders/' + id).set({
@@ -248,13 +244,8 @@
         data.forEach(o => {
             const s = o.status || "CAD"; const wt = parseFloat(o.weight) || 0; const p = o.party || "-";
             if(!pC[p]) pC[p] = { pending: 0, rec30: 0 };
-            if(s !== "READY") { 
-                hand += wt; pC[p].pending++; 
-                let countEl = document.getElementById('count-' + s); if(countEl) countEl.innerText = (parseInt(countEl.innerText) + 1);
-            } else {
-                let readyEl = document.getElementById('count-READY'); if(readyEl) readyEl.innerText = (parseInt(readyEl.innerText) + 1);
-                if(o.ts >= monthAgo) done += wt;
-            }
+            if(s !== "READY") { hand += wt; pC[p].pending++; let countEl = document.getElementById('count-' + s); if(countEl) countEl.innerText = (parseInt(countEl.innerText) + 1); } 
+            else { let readyEl = document.getElementById('count-READY'); if(readyEl) readyEl.innerText = (parseInt(readyEl.innerText) + 1); if(o.ts >= monthAgo) done += wt; }
             if(o.ts >= monthAgo) pC[p].rec30++;
         });
         document.getElementById('totalHandWt').innerText = hand.toFixed(3);
@@ -275,29 +266,15 @@
 
     function moveNext(id, cur) { const idx = depts.indexOf(cur); if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1], ts: Date.now() }); }
     
-    // UPDATED DOWNLOAD FORM - FORCES FORMATTING TO IMAGE
     function downloadForm(id) {
         const o = window.fullData.find(x => x.id === id);
-        document.getElementById('c_id').innerText = o.id;
-        document.getElementById('c_pa').innerText = o.party;
-        
-        const displayWt = parseFloat(o.weight).toFixed(3);
-        document.getElementById('c_wt').innerText = displayWt + " gms";
-        
-        const displaySize = o.size.includes("NO.") ? o.size : o.size + " NO.";
-        document.getElementById('c_sz').innerText = displaySize;
-        
+        // Note: Party and ID IDs are removed from canvas but data is still available for processing if needed
+        document.getElementById('c_wt').innerText = o.weight; 
+        document.getElementById('c_sz').innerText = o.size;   
         document.getElementById('c_cad').innerText = o.cadWorker || "-";
         document.getElementById('c_sp').innerText = o.specs || "-";
         document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
-        
-        setTimeout(() => { 
-            html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => { 
-                const img = canvas.toDataURL("image/jpeg", 0.9); 
-                const w = window.open(); 
-                w.document.write(`<body style="margin:0; background:#333; text-align:center;"><img src="${img}" style="max-width:100%;"></body>`); 
-            }); 
-        }, 500);
+        setTimeout(() => { html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => { const img = canvas.toDataURL("image/jpeg", 0.9); const w = window.open(); w.document.write(`<body style="margin:0; background:#333; text-align:center;"><img src="${img}" style="max-width:100%;"></body>`); }); }, 500);
     }
 
     function filterOrders() {
