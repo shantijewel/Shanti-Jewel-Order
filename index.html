@@ -4,101 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shanti Jewel ERP</title>
-    <!-- Firebase & Image Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f8f9fa; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
+        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
         
-        /* Security Overlay */
-        #authOverlay { position: fixed; inset: 0; background: var(--brown); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        .pin-input { width: 150px; text-align: center; font-size: 24px; letter-spacing: 10px; border: none; border-bottom: 2px solid white; background: none; color: white; margin: 20px; outline: none; }
-
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .header { background: var(--brown); color: white; text-align: center; padding: 18px; font-weight: bold; font-size: 20px; letter-spacing: 1px; }
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
         
-        /* Order Cards & Arrows */
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .arrow-line { display: flex; gap: 4px; margin-top: 10px; overflow-x: auto; }
-        .arrow-step { background: #eee; padding: 4px 8px; border-radius: 4px; color: #999; font-size: 9px; }
-        .arrow-step.active { background: var(--gold); color: white; }
-
-        /* The Shareable Form Styling */
-        #formCanvas { background: white; width: 400px; padding: 25px; border: 4px solid var(--gold); position: fixed; left: -2000px; }
+        /* Cards */
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .info-label { font-size: 11px; color: var(--gold); font-weight: bold; text-transform: uppercase; }
         
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
-        .tab { flex: 1; text-align: center; padding: 10px; font-size: 11px; color: #888; }
-        .tab.active { color: var(--gold); }
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        /* Workflow Arrows */
+        .arrow-container { display: flex; gap: 5px; margin-top: 12px; overflow-x: auto; padding-bottom: 5px; }
+        .step { background: #e0e0e0; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #777; white-space: nowrap; }
+        .step.active { background: var(--gold); color: white; }
+
+        /* Form for CAD Image */
+        #cadCanvas { background: white; width: 450px; padding: 30px; position: fixed; left: -3000px; border: 10px solid var(--gold); }
+        .cad-imgs { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .cad-imgs img { height: 150px; width: 150px; object-fit: cover; border-radius: 10px; }
+
+        /* UI Elements */
+        input, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.2s; }
+        .btn-gold { background: var(--gold); color: white; }
+        .btn-outline { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 5px; }
+
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
+        .tab { flex: 1; text-align: center; padding: 12px; font-size: 11px; color: #999; font-weight: bold; }
+        .tab.active { color: var(--brown); border-top: 3px solid var(--brown); }
     </style>
 </head>
 <body>
 
-<!-- PASSCODE LOCK -->
-<div id="authOverlay">
-    <h2>SHANTI JEWEL</h2>
-    <p>Enter Access PIN</p>
-    <input type="password" id="pin" class="pin-input" maxlength="4" oninput="checkPin(this.value)">
-</div>
+<div class="header">SHANTI JEWEL</div>
 
-<div class="header">
-    <span>SHANTI JEWEL</span>
-    <span onclick="showTab('admin')" style="font-size: 12px;">🛡️</span>
-</div>
-
-<!-- NEW ORDER -->
+<!-- TAB 1: NEW ENTRY -->
 <div id="addPage" class="page active">
     <div class="card">
-        <div id="uploadBox" style="border:2px dashed var(--gold); padding:20px; text-align:center;" onclick="document.getElementById('multiFile').click()">
-            <b id="upLabel">📸 UPLOAD IMAGES</b>
-            <div id="previewGrid" style="display:flex; gap:5px; margin-top:10px; overflow-x:auto;"></div>
+        <div id="uploadArea" style="border:2px dashed #ccc; padding:30px; text-align:center; border-radius:10px;" onclick="document.getElementById('fileInput').click()">
+            <span id="upMsg">📸 Tap to add up to 3 Design Photos</span>
+            <div id="previews" style="display:flex; gap:5px; justify-content:center; margin-top:10px;"></div>
         </div>
-        <input type="file" id="multiFile" accept="image/*" multiple style="display:none" onchange="handleFiles(event)">
-        <input type="text" id="orderId" placeholder="Order Number">
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="previewImages(event)">
+        
+        <input type="text" id="orderId" placeholder="Order Number (Required)">
         <input type="text" id="party" placeholder="Party Name">
-        <input type="text" id="weight" placeholder="Weight (g)">
-        <input type="text" id="size" placeholder="Size">
-        <input type="date" id="deliveryDate">
-        <textarea id="specs" placeholder="Specifications..."></textarea>
-        <button class="btn" style="background:var(--gold); color:white;" onclick="saveOrder()">PUNCH ORDER</button>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="weight" placeholder="Gross Wt (g)">
+            <input type="text" id="size" placeholder="Size">
+        </div>
+        <input type="date" id="delDate">
+        <textarea id="specs" rows="3" placeholder="Additional Specifications..."></textarea>
+        <button class="btn btn-gold" onclick="saveToFirebase()">PUNCH ORDER</button>
     </div>
 </div>
 
-<!-- PENDING ORDERS -->
-<div id="pendingPage" class="page">
-    <div id="pendingList"></div>
+<!-- TAB 2: WORKFLOW (STATUS TRACKING) -->
+<div id="statusPage" class="page">
+    <div id="statusList"></div>
 </div>
 
-<!-- ADMIN PAGE -->
-<div id="adminPage" class="page">
-    <h3>Connected Devices</h3>
-    <div id="deviceList" class="card"></div>
-    <button class="btn" style="background:#e74c3c; color:white;" onclick="location.reload()">LOGOUT</button>
+<!-- TAB 3: ORDER INFO (FULL DATA) -->
+<div id="infoPage" class="page">
+    <div id="fullInfoList"></div>
 </div>
 
-<!-- HIDDEN FORM FOR IMAGE CONVERSION -->
-<div id="formCanvas">
-    <div style="text-align:center; border-bottom:2px solid var(--brown);">
-        <h1 style="color:var(--brown); margin:0;">SHANTI JEWEL</h1>
-        <p style="letter-spacing:5px;">ORDER FORM</p>
+<!-- HIDDEN CANVAS FOR CAD IMAGE GENERATION -->
+<div id="cadCanvas">
+    <div style="text-align:center; border-bottom:3px solid var(--brown); padding-bottom:10px;">
+        <h1 style="color:var(--brown); margin:0; font-size:35px;">SHANTI JEWEL</h1>
+        <p style="letter-spacing:8px; margin:5px 0;">ORDER FORM</p>
     </div>
-    <div id="cImgs" style="display:flex; justify-content:center; gap:10px; margin:20px 0;"></div>
-    <div style="font-size:20px;">
-        <b>Order:</b> #<span id="cId"></span><br>
-        <b>Party:</b> <span id="cParty"></span><br>
+    <div id="cadImgContainer" class="cad-imgs"></div>
+    <div style="font-size:24px; line-height:1.8;">
+        <b>Order ID:</b> #<span id="cId"></span><br>
+        <b>Customer:</b> <span id="cParty"></span><br>
         <b>Weight:</b> <span id="cWt"></span>g | <b>Size:</b> <span id="cSz"></span><br>
-        <b>Date:</b> <span id="cDate"></span><br>
-        <b>Specs:</b> <p id="cSpecs"></p>
+        <b>Delivery:</b> <span id="cDate"></span><br>
+        <b>Notes:</b> <p id="cSpecs" style="background:#f9f9f9; padding:15px; border-radius:8px;"></p>
     </div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="showTab('add', this)">NEW</div>
-    <div class="tab" onclick="showTab('pending', this)">PENDING</div>
+    <div class="tab active" onclick="nav('add', this)">NEW</div>
+    <div class="tab" onclick="nav('status', this)">WORKFLOW</div>
+    <div class="tab" onclick="nav('info', this)">ALL ORDERS</div>
 </div>
 
 <script>
@@ -111,97 +107,98 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    // SECURITY CONFIG
-    const MASTER_PIN = "1008"; // SET YOUR PIN HERE
-    const deviceId = "Dev-" + Math.floor(Math.random() * 9999);
+    let currentImages = [];
+    const deptFlow = ["CAD", "CAM", "CASTING", "POLISHING", "HUID", "READY"];
 
-    function checkPin(val) {
-        if(val === MASTER_PIN) {
-            document.getElementById('authOverlay').style.display = 'none';
-            db.ref('devices/' + deviceId).set({ lastActive: Date.now(), id: deviceId });
-        }
-    }
-
-    let uploadedImgs = [];
-    const stages = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
-
-    function handleFiles(e) {
+    function previewImages(e) {
         const files = Array.from(e.target.files).slice(0, 3);
-        uploadedImgs = [];
-        document.getElementById('previewGrid').innerHTML = "";
-        files.forEach(file => {
+        currentImages = [];
+        const container = document.getElementById('previews');
+        container.innerHTML = "";
+        files.forEach(f => {
             const reader = new FileReader();
-            reader.onload = (f) => {
-                uploadedImgs.push(f.target.result);
-                document.getElementById('previewGrid').innerHTML += `<img src="${f.target.result}" style="height:60px; border-radius:5px;">`;
+            reader.onload = (rs) => {
+                currentImages.push(rs.target.result);
+                container.innerHTML += `<img src="${rs.target.result}" style="width:50px; height:50px; border-radius:5px; object-fit:cover;">`;
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(f);
         });
+        document.getElementById('upMsg').innerText = files.length + " Images Selected";
     }
 
-    function showTab(page, el) {
+    function nav(page, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(page + 'Page').classList.add('active');
-        if(el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-        }
-        if(page === 'pending') renderPending();
-        if(page === 'admin') renderAdmin();
+        el.classList.add('active');
+        if(page === 'status' || page === 'info') loadOrders();
     }
 
-    function saveOrder() {
+    function saveToFirebase() {
         const id = document.getElementById('orderId').value;
-        if(!id) return alert("Enter Order ID");
+        if(!id) return alert("Enter Order Number!");
         db.ref('orders/' + id).set({
             id, party: document.getElementById('party').value,
             weight: document.getElementById('weight').value,
             size: document.getElementById('size').value,
-            date: document.getElementById('deliveryDate').value,
+            date: document.getElementById('delDate').value,
             specs: document.getElementById('specs').value,
-            images: uploadedImgs,
-            status: "CAD"
-        }).then(() => { alert("Saved!"); location.reload(); });
+            imgs: currentImages,
+            status: "CAD",
+            time: Date.now()
+        }).then(() => { alert("Order Punched!"); location.reload(); });
     }
 
-    function renderPending() {
+    function loadOrders() {
         db.ref('orders').on('value', (snap) => {
-            const list = document.getElementById('pendingList');
-            list.innerHTML = "";
-            const data = snap.val(); if(!data) return;
-            Object.values(data).forEach(o => {
-                let arrows = stages.map(s => `<div class="arrow-step ${o.status === s ? 'active' : ''}">${s}</div>`).join('');
-                list.innerHTML += `
-                    <div class="card">
-                        <div onclick="generateShareable('${o.id}')">
-                            <b>#${o.id} | ${o.party}</b><br>
-                            <small>Due: ${o.date} | Wt: ${o.weight}g</small>
-                            <div class="arrow-line">${arrows}</div>
+            const data = snap.val();
+            const sList = document.getElementById('statusList');
+            const iList = document.getElementById('fullInfoList');
+            sList.innerHTML = ""; iList.innerHTML = "";
+            if(!data) return;
+
+            Object.values(data).reverse().forEach(o => {
+                // Workflow Card
+                let steps = deptFlow.map(s => `<div class="step ${o.status === s ? 'active' : ''}">${s}</div>`).join('');
+                sList.innerHTML += `
+                <div class="card">
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <img src="${o.imgs[0]}" style="width:70px; height:70px; border-radius:8px; object-fit:cover;">
+                        <div>
+                            <b>#${o.id} - ${o.party}</b><br>
+                            <small>Next: ${deptFlow[deptFlow.indexOf(o.status)+1] || 'Completed'}</small>
                         </div>
-                        <button class="btn" style="background:#eee; font-size:10px;" onclick="advanceStage('${o.id}', '${o.status}')">MOVE NEXT</button>
-                    </div>`;
+                    </div>
+                    <div class="arrow-container">${steps}</div>
+                    <button class="btn btn-outline" style="font-size:12px;" onclick="moveNext('${o.id}', '${o.status}')">CONFIRM MOVE TO NEXT DEPT</button>
+                    <button class="btn btn-outline" style="border-color:#25D366; color:#25D366;" onclick="makeCADImage('${o.id}')">SEND CAD FORM</button>
+                </div>`;
+
+                // Full Info Card
+                iList.innerHTML += `
+                <div class="card">
+                    <div class="info-label">Order Details</div>
+                    <h3>#${o.id} | ${o.party}</h3>
+                    <p><b>Wt:</b> ${o.weight}g | <b>Size:</b> ${o.size}<br><b>Delivery:</b> ${o.date}</p>
+                    <div class="info-label">Specifications</div>
+                    <p style="background:#f4f4f4; padding:8px; border-radius:5px;">${o.specs || 'No notes'}</p>
+                    <div style="display:flex; gap:5px; overflow-x:auto;">
+                        ${o.imgs.map(m => `<img src="${m}" style="height:100px; border-radius:5px;">`).join('')}
+                    </div>
+                </div>`;
             });
         });
     }
 
-    function advanceStage(id, current) {
-        const nextIdx = stages.indexOf(current) + 1;
-        if(nextIdx < stages.length) db.ref('orders/' + id).update({status: stages[nextIdx]});
+    function moveNext(id, current) {
+        const nextIdx = deptFlow.indexOf(current) + 1;
+        if(nextIdx >= deptFlow.length) return alert("Order is already Ready!");
+        if(confirm(`Move Order #${id} from ${current} to ${deptFlow[nextIdx]}?`)) {
+            db.ref('orders/' + id).update({status: deptFlow[nextIdx]});
+        }
     }
 
-    function renderAdmin() {
-        db.ref('devices').on('value', (snap) => {
-            const list = document.getElementById('deviceList');
-            list.innerHTML = "";
-            const data = snap.val(); if(!data) return;
-            Object.values(data).forEach(d => {
-                list.innerHTML += `<div>📱 ${d.id} <br><small>Active: ${new Date(d.lastActive).toLocaleTimeString()}</small></div><hr>`;
-            });
-        });
-    }
-
-    // THE MAGIC: Convert to Image
-    function generateShareable(id) {
+    function makeCADImage(id) {
         db.ref('orders/' + id).once('value', (snap) => {
             const o = snap.val();
             document.getElementById('cId').innerText = o.id;
@@ -210,15 +207,14 @@
             document.getElementById('cSz').innerText = o.size;
             document.getElementById('cDate').innerText = o.date;
             document.getElementById('cSpecs').innerText = o.specs;
-            document.getElementById('cImgs').innerHTML = o.images.map(img => `<img src="${img}" style="height:120px;">`).join('');
+            document.getElementById('cadImgContainer').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
 
-            html2canvas(document.querySelector("#formCanvas")).then(canvas => {
-                const imgData = canvas.toDataURL("image/jpeg");
+            html2canvas(document.querySelector("#cadCanvas")).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Order_${o.id}.jpg`;
-                link.href = imgData;
+                link.download = `Shanti_Order_${o.id}.jpg`;
+                link.href = canvas.toDataURL("image/jpeg");
                 link.click();
-                alert("Order Image Downloaded! Now share this file to WhatsApp.");
+                alert("CAD Form Ready! Please check your downloads/gallery and share it.");
             });
         });
     }
