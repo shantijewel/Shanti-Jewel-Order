@@ -11,11 +11,10 @@
         :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         
-        /* Login Screen */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--brown); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .login-box { background: white; padding: 30px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; border-bottom: 5px solid var(--gold); }
-        .login-box h2 { color: var(--brown); margin-top: 0; }
-        .login-box input { border: 2px solid #ddd; text-align: center; letter-spacing: 5px; font-size: 24px; color: var(--brown); }
+        .login-box h2 { color: var(--brown); margin-top: 0; font-size: 20px; }
+        .login-box input { width: 100%; padding: 12px; border: 2px solid #ddd; text-align: center; letter-spacing: 8px; font-size: 24px; color: var(--brown); border-radius: 8px; box-sizing: border-box; }
 
         .header { background: var(--brown); color: white; text-align: center; padding: 10px; border-bottom: 3px solid var(--gold); }
         .logo-text { font-size: 22px; font-weight: bold; letter-spacing: 2px; margin: 0; }
@@ -26,11 +25,22 @@
         .page.active { display: block; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
         
-        /* Dashboard Styling */
+        .wipeout-lock { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; margin-top: 20px; border: 1px solid #ddd; }
         .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .dash-item { background: var(--brown); color: white; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--gold); }
-        .dash-count { font-size: 20px; font-weight: bold; display: block; }
+        .dash-count { font-size: 18px; font-weight: bold; display: block; }
         .dash-label { font-size: 9px; text-transform: uppercase; color: var(--gold); }
+
+        .stats-banner { background: #fff; border: 1px solid var(--gold); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center; }
+        .stats-banner b { display: block; font-size: 20px; color: var(--brown); }
+        .stats-banner span { font-size: 10px; color: #777; text-transform: uppercase; font-weight: bold; }
+
+        .party-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; font-size: 12px; margin-bottom: 20px; }
+        .party-table th { background: var(--brown); color: var(--gold); padding: 10px; text-align: left; }
+        .party-table td { padding: 10px; border-bottom: 1px solid #eee; }
+
+        .search-container { position: sticky; top: 0; background: var(--bg); padding: 5px 0 15px 0; z-index: 10; }
+        .search-container input { margin: 0; border: 2px solid var(--gold); }
 
         .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .photo-box { border: 2px dashed var(--gold); height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; background: #fafafa; font-size: 12px; color: var(--brown); font-weight: bold; }
@@ -41,32 +51,27 @@
         .btn-gold { background: var(--gold); color: white; }
         .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
         
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 25px 2px; font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; overflow-x: auto; }
+        .tab { flex: 1; min-width: 85px; text-align: center; padding: 25px 5px; font-size: 8px; color: #999; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
 
-        /* DESIGNED ORDER FORM FOR DOWNLOAD */
         #formCanvas { background: white; width: 600px; height: 850px; padding: 30px; position: fixed; left: -5000px; border: 12px solid var(--gold); box-sizing: border-box; }
-        .canvas-header { text-align: center; border-bottom: 4px solid var(--brown); padding-bottom: 20px; margin-bottom: 20px; }
-        .canvas-shree { font-size: 18px; color: #333; margin-bottom: 5px; }
-        .canvas-logo { font-size: 48px; font-weight: bold; color: var(--brown); letter-spacing: 5px; margin: 0; }
-        .canvas-sub { font-size: 16px; color: var(--gold); letter-spacing: 10px; font-weight: bold; }
-        .canvas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .canvas-header { text-align: center; border-bottom: 4px solid var(--brown); padding-bottom: 15px; margin-bottom: 15px; }
+        .canvas-logo { font-size: 44px; font-weight: bold; color: var(--brown); letter-spacing: 4px; margin: 0; }
+        .canvas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
         .canvas-grid img { width: 100%; height: 230px; object-fit: cover; border: 2px solid #eee; border-radius: 5px; }
-        .details-table { width: 100%; font-size: 22px; border-collapse: collapse; margin-top: 10px; }
+        .details-table { width: 100%; font-size: 22px; border-collapse: collapse; }
         .details-table td { padding: 12px 0; border-bottom: 1px solid #eee; }
-        .notes-box { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-size: 20px; min-height: 100px; }
     </style>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
 <div id="loginOverlay">
     <div class="login-box">
         <span style="color:var(--gold); font-weight:bold; display:block; margin-bottom:10px;">IIश्रीII</span>
-        <h2>SHANTI JEWEL</h2>
-        <input type="password" id="passInput" placeholder="0000" maxlength="4">
-        <button class="btn btn-gold" style="margin-top:20px;" onclick="checkPass()">LOGIN</button>
+        <h2>APP LOGIN</h2>
+        <input type="password" id="passInput" placeholder="••••" maxlength="4">
+        <button class="btn btn-gold" style="margin-top:20px;" onclick="checkPass()">ENTER</button>
     </div>
 </div>
 
@@ -76,22 +81,8 @@
     <div class="sub-header">ORDER PORTAL</div>
 </div>
 
-<!-- DASHBOARD PAGE (WIPEOUT) -->
-<div id="dashPage" class="page active">
-    <h3 style="text-align:center; color:var(--brown);">PRODUCTION DASHBOARD</h3>
-    <div class="dash-grid" id="statsGrid">
-        <div class="dash-item"><span class="dash-count" id="count-CAD">0</span><span class="dash-label">CAD</span></div>
-        <div class="dash-item"><span class="dash-count" id="count-CAM">0</span><span class="dash-label">CAM</span></div>
-        <div class="dash-item"><span class="dash-count" id="count-CASTING">0</span><span class="dash-label">CASTING</span></div>
-        <div class="dash-item"><span class="dash-count" id="count-POLISH">0</span><span class="dash-label">POLISH</span></div>
-        <div class="dash-item"><span class="dash-count" id="count-HUID">0</span><span class="dash-label">HUID</span></div>
-        <div class="dash-item" style="background:green;"><span class="dash-count" id="count-READY">0</span><span class="dash-label">READY</span></div>
-    </div>
-    <div id="dashRecent"></div>
-</div>
-
-<!-- ADD ORDER PAGE -->
-<div id="addPage" class="page">
+<!-- 1. ORDER PUNCH IN -->
+<div id="punchPage" class="page active">
     <div class="card">
         <div class="photo-grid">
             <div class="photo-box" id="p1" onclick="document.getElementById('f1').click()">+ PHOTO 1</div>
@@ -103,7 +94,6 @@
         <input type="file" id="f2" accept="image/*" style="display:none" onchange="handleSingle(this, 'p2', 1)">
         <input type="file" id="f3" accept="image/*" style="display:none" onchange="handleSingle(this, 'p3', 2)">
         <input type="file" id="f4" accept="image/*" style="display:none" onchange="handleSingle(this, 'p4', 3)">
-
         <input type="text" id="i_id" placeholder="Order Number">
         <select id="i_pa">
             <option value="">Select Party Name</option>
@@ -125,73 +115,93 @@
             <option value="ALAUDDIN">ALAUDDIN</option>
         </select>
         <textarea id="i_sp" rows="3" placeholder="Production Instructions"></textarea>
-        <button class="btn btn-gold" onclick="saveOrder()">PROCESS ORDER</button>
+        <button class="btn btn-gold" onclick="saveOrder()">SAVE & PROCESS</button>
     </div>
 </div>
 
-<div id="listPage" class="page"><div id="mainList"></div></div>
+<!-- 2. PRODUCTION -->
+<div id="productionPage" class="page"><div id="prodList"></div></div>
+
+<!-- 3. ACTIVE ORDERS -->
+<div id="activePage" class="page">
+    <div class="search-container"><input type="text" id="searchInput" placeholder="🔍 Search Order ID..." onkeyup="filterOrders()"></div>
+    <div id="activeList"></div>
+</div>
+
+<!-- 4. PAST ORDERS -->
 <div id="pastPage" class="page"><div id="pastList"></div></div>
+
+<!-- 5. DASHBOARD (LOCKED) -->
+<div id="dashPage" class="page">
+    <div id="wipeoutLock" class="wipeout-lock">
+        <h2 style="color:var(--brown); margin-top:0;">ADMIN ACCESS</h2>
+        <p style="font-size:12px; color:#666;">Enter password to view Wipeout Analytics</p>
+        <input type="password" id="wipeoutPass" placeholder="••••" maxlength="4" style="width:100px; letter-spacing:4px;">
+        <button class="btn btn-gold" style="margin-top:15px; width:150px;" onclick="unlockWipeout()">UNLOCK</button>
+    </div>
+
+    <div id="wipeoutContent" style="display:none;">
+        <div class="stats-banner">
+            <div><b id="totalHandWt">0.00</b><span>In Hand (gms)</span></div>
+            <div><b id="totalDoneWt">0.00</b><span>Done (30 Days)</span></div>
+        </div>
+
+        <div class="dash-grid">
+            <div class="dash-item"><span class="dash-count" id="count-CAD">0</span><span class="dash-label">CAD</span></div>
+            <div class="dash-item"><span class="dash-count" id="count-CAM">0</span><span class="dash-label">CAM</span></div>
+            <div class="dash-item"><span class="dash-count" id="count-CASTING">0</span><span class="dash-label">CASTING</span></div>
+            <div class="dash-item"><span class="dash-count" id="count-POLISH">0</span><span class="dash-label">POLISH</span></div>
+            <div class="dash-item"><span class="dash-count" id="count-HUID">0</span><span class="dash-label">HUID</span></div>
+            <div class="dash-item" style="background:green;"><span class="dash-count" id="count-READY">0</span><span class="dash-label">READY</span></div>
+        </div>
+
+        <h3 style="font-size:14px; color:var(--brown); border-left:4px solid var(--gold); padding-left:10px;">PARTY BREAKDOWN</h3>
+        <table class="party-table">
+            <thead><tr><th>Party</th><th>Pending</th><th>Recd (30D)</th></tr></thead>
+            <tbody id="partyStatsBody"></tbody>
+        </table>
+        <button class="btn btn-out" onclick="location.reload()">LOCK DASHBOARD</button>
+    </div>
+</div>
 
 <!-- FORM CANVAS -->
 <div id="formCanvas">
-    <div class="canvas-header">
-        <div class="canvas-shree">IIश्रीII</div>
-        <div class="canvas-logo">SHANTI JEWEL</div>
-        <div class="canvas-sub">ORDER FORM</div>
-    </div>
+    <div class="canvas-header"><div class="canvas-logo">SHANTI JEWEL</div></div>
     <div id="c_imgs" class="canvas-grid"></div>
-    <table class="details-table">
-        <tr><td><b>ORDER ID:</b> <span id="c_id"></span></td><td><b>PARTY:</b> <span id="c_pa"></span></td></tr>
-        <tr><td><b>CAD:</b> <span id="c_cad"></span></td><td><b>WT:</b> <span id="c_wt"></span></td></tr>
-        <tr><td colspan="2"><b>SIZE:</b> <span id="c_sz"></span></td></tr>
-    </table>
-    <div class="notes-box"><b>PRODUCTION NOTES:</b><br><span id="c_sp"></span></div>
+    <table class="details-table"><tr><td><b>ORDER ID:</b> <span id="c_id"></span></td><td><b>PARTY:</b> <span id="c_pa"></span></td></tr><tr><td><b>WT:</b> <span id="c_wt"></span></td></tr></table>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="nav('dash', this)">DASHBOARD</div>
-    <div class="tab" onclick="nav('add', this)">PUNCH</div>
-    <div class="tab" onclick="nav('list', this)">WIP</div>
-    <div class="tab" onclick="nav('past', this)">HISTORY</div>
+    <div class="tab active" onclick="nav('punch', this)">ORDER PUNCH IN</div>
+    <div class="tab" onclick="nav('production', this)">PRODUCTION</div>
+    <div class="tab" onclick="nav('active', this)">ACTIVE ORDERS</div>
+    <div class="tab" onclick="nav('past', this)">PAST ORDERS</div>
+    <div class="tab" onclick="nav('dash', this)">DASHBOARD</div>
 </div>
 
 <script>
-    function checkPass() {
-        if(document.getElementById('passInput').value === '2215') {
-            document.getElementById('loginOverlay').style.display = 'none';
-            loadOrders();
-        } else {
-            alert("Incorrect Password");
-        }
-    }
+    function checkPass() { if(document.getElementById('passInput').value === '1008') { document.getElementById('loginOverlay').style.display = 'none'; loadOrders(); } else { alert("Incorrect"); } }
+    function unlockWipeout() { if(document.getElementById('wipeoutPass').value === '2215') { document.getElementById('wipeoutLock').style.display = 'none'; document.getElementById('wipeoutContent').style.display = 'block'; } else { alert("Wrong Password"); } }
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
-        authDomain: "shanti-jewel-order.firebaseapp.com",
-        projectId: "shanti-jewel-order",
-        databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU", authDomain: "shanti-jewel-order.firebaseapp.com", projectId: "shanti-jewel-order", databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const depts = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
     let photoData = [null, null, null, null];
 
-    async function handleSingle(input, previewId, index) {
-        if (!input.files || !input.files[0]) return;
+    async function handleSingle(input, pId, idx) {
         const reader = new FileReader();
-        reader.onload = async (e) => {
+        reader.onload = (e) => {
             const img = new Image();
             img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const max = 800;
-                let w = img.width, h = img.height;
+                const max = 800; let w = img.width, h = img.height;
                 if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const optimized = canvas.toDataURL("image/jpeg", 0.6);
-                photoData[index] = optimized;
-                document.getElementById(previewId).innerHTML = `<img src="${optimized}">`;
+                photoData[idx] = canvas.toDataURL("image/jpeg", 0.6);
+                document.getElementById(pId).innerHTML = `<img src="${photoData[idx]}">`;
             };
         };
         reader.readAsDataURL(input.files[0]);
@@ -199,71 +209,80 @@
 
     function saveOrder() {
         const id = document.getElementById('i_id').value;
-        const validPhotos = photoData.filter(p => p !== null);
-        if(!id || validPhotos.length === 0) return alert("Order ID and Photos required");
+        const valid = photoData.filter(p => p !== null);
+        if(!id || valid.length === 0) return alert("ID & Photos Required");
         db.ref('orders/' + id).set({
             id: id, party: document.getElementById('i_pa').value || "-",
-            weight: (document.getElementById('i_wt').value || "0") + "gms",
-            size: (document.getElementById('i_sz').value || "-") + "NO.",
-            dueDate: document.getElementById('i_dd').value || "9999-12-31",
+            weight: parseFloat(document.getElementById('i_wt').value) || 0,
+            status: "CAD", ts: Date.now(), imgs: valid, 
             cadWorker: document.getElementById('i_cad').value || "-",
-            specs: document.getElementById('i_sp').value || "None",
-            imgs: validPhotos, status: "CAD", ts: Date.now()
-        }).then(() => { alert("Order Saved!"); location.reload(); });
+            specs: document.getElementById('i_sp').value || "-"
+        }).then(() => { alert("Saved!"); location.reload(); });
     }
 
     function nav(p, el) {
         document.querySelectorAll('.page, .tab').forEach(x => x.classList.remove('active'));
         document.getElementById(p + 'Page').classList.add('active');
         el.classList.add('active');
-        loadOrders();
     }
 
     function loadOrders() {
         db.ref('orders').on('value', s => {
             const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
-            const sList = document.getElementById('mainList'), pList = document.getElementById('pastList');
-            sList.innerHTML = ""; pList.innerHTML = "";
-            
-            depts.forEach(d => document.getElementById('count-' + d).innerText = "0");
-            const counts = {};
-
-            data.forEach(o => {
-                const cur = o.status || "CAD";
-                counts[cur] = (counts[cur] || 0) + 1;
-                document.getElementById('count-' + cur).innerText = counts[cur];
-
-                const card = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> | Stage: <span style="color:var(--gold)">${cur}</span><br><small>${o.party}</small></div></div><div style="display:flex; gap:5px;"><button class="btn btn-out" style="flex:1" onclick="moveNext('${o.id}', '${cur}')">MOVE NEXT</button><button class="btn btn-out" style="flex:1; color:green; border-color:green;" onclick="downloadForm('${o.id}')">FORM</button></div></div>`;
-                if(cur !== "READY") sList.innerHTML += card;
-                else pList.innerHTML += card;
-            });
-            window.activeData = data;
+            window.fullData = data;
+            renderLists(data);
+            calcDash(data);
         });
     }
 
-    function moveNext(id, cur) {
-        const idx = depts.indexOf(cur);
-        if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1], ts: Date.now() });
+    function calcDash(data) {
+        const monthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        let hand = 0; let done = 0; let pC = {};
+        depts.forEach(d => document.getElementById('count-' + d).innerText = "0");
+
+        data.forEach(o => {
+            const s = o.status || "CAD"; const wt = parseFloat(o.weight) || 0; const p = o.party || "-";
+            if(!pC[p]) pC[p] = { pending: 0, rec30: 0 };
+            if(s !== "READY") { 
+                hand += wt; pC[p].pending++; 
+                document.getElementById('count-' + s).innerText = (parseInt(document.getElementById('count-' + s).innerText) + 1);
+            } else {
+                document.getElementById('count-READY').innerText = (parseInt(document.getElementById('count-READY').innerText) + 1);
+                if(o.ts >= monthAgo) done += wt;
+            }
+            if(o.ts >= monthAgo) pC[p].rec30++;
+        });
+
+        document.getElementById('totalHandWt').innerText = hand.toFixed(3);
+        document.getElementById('totalDoneWt').innerText = done.toFixed(3);
+        const tb = document.getElementById('partyStatsBody'); tb.innerHTML = "";
+        for(let p in pC) tb.innerHTML += `<tr><td>${p}</td><td>${pC[p].pending}</td><td>${pC[p].rec30}</td></tr>`;
     }
 
+    function renderLists(data) {
+        const pL = document.getElementById('prodList'); const aL = document.getElementById('activeList'); const hL = document.getElementById('pastList');
+        pL.innerHTML = ""; aL.innerHTML = ""; hL.innerHTML = "";
+        data.forEach(o => {
+            const html = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:65px; height:65px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> | <span style="color:var(--gold)">${o.status}</span><br><small>${o.party}</small></div></div><div style="display:flex; gap:5px;"><button class="btn btn-out" style="flex:1" onclick="moveNext('${o.id}', '${o.status}')">NEXT</button><button class="btn btn-out" style="flex:1; color:green; border-color:green;" onclick="downloadForm('${o.id}')">FORM</button></div></div>`;
+            if(o.status !== "READY") { pL.innerHTML += html; aL.innerHTML += html; }
+            else { hL.innerHTML += `<div class="card" style="opacity:0.8; border-left: 5px solid green;"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:65px; height:65px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> | <span style="color:green">READY</span><br><small>${o.party}</small></div></div></div>`; }
+        });
+    }
+
+    function moveNext(id, cur) { const idx = depts.indexOf(cur); if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1], ts: Date.now() }); }
+    
     function downloadForm(id) {
-        const o = window.activeData.find(x => x.id === id);
-        if(!o) return;
-        document.getElementById('c_id').innerText = o.id;
-        document.getElementById('c_pa').innerText = o.party;
-        document.getElementById('c_cad').innerText = o.cadWorker;
-        document.getElementById('c_wt').innerText = o.weight;
-        document.getElementById('c_sz').innerText = o.size;
-        document.getElementById('c_sp').innerText = o.specs;
-        document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
-        
-        setTimeout(() => {
-            html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
-                const img = canvas.toDataURL("image/jpeg", 0.9);
-                const w = window.open();
-                w.document.write(`<body style="margin:0;"><img src="${img}" style="width:100%;"><p style="text-align:center;">Long press to save form</p></body>`);
-            });
-        }, 500);
+        const o = window.fullData.find(x => x.id === id);
+        document.getElementById('c_id').innerText = o.id; document.getElementById('c_pa').innerText = o.party;
+        document.getElementById('c_wt').innerText = o.weight + " gms"; document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
+        setTimeout(() => { html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => { const img = canvas.toDataURL("image/jpeg", 0.9); const w = window.open(); w.document.write(`<body style="margin:0;"><img src="${img}" style="width:100%;"></body>`); }); }, 500);
+    }
+
+    function filterOrders() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const f = window.fullData.filter(o => o.id.toLowerCase().includes(q) && o.status !== "READY");
+        const aL = document.getElementById('activeList'); aL.innerHTML = "";
+        f.forEach(o => { aL.innerHTML += `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:65px; height:65px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> | <span style="color:var(--gold)">${o.status}</span><br><small>${o.party}</small></div></div><div style="display:flex; gap:5px;"><button class="btn btn-out" style="flex:1" onclick="moveNext('${o.id}', '${o.status}')">NEXT</button><button class="btn btn-out" style="flex:1; color:green; border-color:green;" onclick="downloadForm('${o.id}')">FORM</button></div></div>`; });
     }
 </script>
 </body>
