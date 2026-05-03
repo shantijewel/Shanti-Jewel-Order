@@ -260,7 +260,7 @@
     }
 
     function wipeDatabase() {
-        if(prompt("Password:") === "1234") {
+        if(prompt("Password:") === "2215") {
             if(confirm("Delete All?")) db.ref('orders').remove().then(() => location.reload());
         }
     }
