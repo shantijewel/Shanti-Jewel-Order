@@ -8,92 +8,68 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #5d4037; --red: #b22222; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
-        
-        .header { background: var(--brown); color: white; text-align: center; padding: 18px; font-weight: bold; letter-spacing: 1px; }
+        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
+        .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); }
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* THE RED CAD FORM FOR FREELANCERS - NO PARTY NAME */
-        #cadCanvas { background: white; width: 500px; padding: 30px; position: fixed; left: -5000px; border: 15px solid var(--red); color: var(--red); }
-        .cad-header { text-align: center; border-bottom: 4px solid var(--red); padding-bottom: 10px; margin-bottom: 20px; }
-        .cad-imgs { display: flex; gap: 10px; justify-content: center; margin: 25px 0; }
-        .cad-imgs img { height: 180px; width: 180px; object-fit: cover; border: 2px solid var(--red); border-radius: 5px; }
-        .cad-data { font-size: 22px; font-weight: bold; line-height: 1.6; }
-
-        input, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #ddd; }
+        .flow-box { display: flex; gap: 4px; margin: 10px 0; }
+        .s { background: #eee; padding: 5px; border-radius: 4px; font-size: 9px; font-weight: bold; flex: 1; text-align: center; color: #777; }
+        .s.active { background: var(--gold); color: white; }
+        #formCanvas { background: white; width: 450px; padding: 25px; position: fixed; left: -5000px; border: 10px solid var(--gold); }
+        input, textarea { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-gold { background: var(--gold); color: white; }
-        .btn-red { background: var(--red); color: white; }
-        
+        .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 5px; }
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
-        .tab { flex: 1; text-align: center; padding: 25px 10px; font-size: 12px; font-weight: bold; color: #999; cursor: pointer; }
+        .tab { flex: 1; text-align: center; line-height: 70px; font-size: 12px; font-weight: bold; color: #999; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); }
-        
-        .workflow-row { display: flex; gap: 5px; margin: 10px 0; overflow-x: auto; padding-bottom: 5px; }
-        .workflow-step { font-size: 9px; padding: 4px 8px; border-radius: 3px; white-space: nowrap; }
+        .danger-zone { margin-top: 30px; border-top: 2px dashed #ffcdd2; padding-top: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="header">SHANTI JEWEL ERP</div>
 
-<!-- NEW ORDER PAGE -->
 <div id="addPage" class="page active">
     <div class="card">
-        <h3 id="nextIdLabel" style="color:var(--red); margin:0;">NEXT ORDER ID: ...</h3>
-        <div id="uploadBox" style="border:2px dashed #ccc; padding:20px; text-align:center; margin-top:10px;" onclick="document.getElementById('fileIn').click()">
-            <span id="upMsg">UPLOAD DESIGN PHOTOS (MAX 3)</span>
-            <div id="previews" style="display:flex; gap:5px; justify-content:center; margin-top:10px;"></div>
-        </div>
-        <input type="file" id="fileIn" multiple accept="image/*" style="display:none" onchange="previewImages(event)">
+        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="procImgs(e)">
+        <button class="btn btn-gold" onclick="document.getElementById('fIn').click()">📸 ADD PHOTOS</button>
+        <div id="pv" style="display:flex; gap:5px; margin:10px 0;"></div>
         
-        <input type="text" id="party" placeholder="CUSTOMER NAME">
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="weight" placeholder="WEIGHT IN GRAMS">
-            <input type="text" id="size" placeholder="SIZE">
-        </div>
-        <input type="date" id="delDate">
-        <textarea id="specs" placeholder="DETAILED INSTRUCTIONS FOR CAD WORKER"></textarea>
-        <button class="btn btn-gold" onclick="saveOrder()">PUNCH ORDER</button>
+        <input type="text" id="i_id" placeholder="Order No">
+        <input type="text" id="i_pa" placeholder="Party Name">
+        <input type="text" id="i_wt" placeholder="Weight (g)">
+        <textarea id="i_sp" placeholder="Instructions"></textarea>
+        <button class="btn btn-gold" style="background:#2e7d32" onclick="save()">SAVE ORDER</button>
+    </div>
+
+    <!-- CLEANUP BUTTON -->
+    <div class="danger-zone">
+        <p style="color:red; font-size:12px;">ADMIN: CLEAR ALL RUBBISH DATA</p>
+        <button class="btn" style="background:#ffebee; color:red; border:1px solid red; padding:8px;" onclick="wipeData()">WIPE DATABASE</button>
     </div>
 </div>
 
-<!-- WORKFLOW PAGE -->
-<div id="statusPage" class="page">
-    <div id="statusList"></div>
-</div>
+<div id="listPage" class="page"><div id="mainList"></div></div>
 
-<!-- ALL ORDERS PAGE (RENAMED ARCHIVE) -->
-<div id="infoPage" class="page">
-    <div id="infoList"></div>
-</div>
-
-<!-- THE HIDDEN CAD FORM DESIGN (NO PARTY NAME HERE) -->
-<div id="cadCanvas">
-    <div class="cad-header">
-        <h1 style="font-size:45px; margin:0;">SHANTI JEWEL</h1>
-        <p style="letter-spacing:10px; font-size:18px; margin:5px 0;">ORDER FORM</p>
-    </div>
-    <div id="cadImgBox" class="cad-imgs"></div>
-    <div class="cad-data">
-        <span style="font-size:30px;">JOB ID: #<span id="cId"></span></span><br>
-        WEIGHT: <span id="cWt"></span>G | SIZE: <span id="cSz"></span><br>
-        DELIVERY DATE: <span id="cDate"></span><br>
-        <div style="margin-top:15px; border-top:2px solid var(--red); padding-top:10px;">
-            INSTRUCTIONS:<br>
-            <span id="cSpecs" style="font-weight:normal;"></span>
+<div id="formCanvas">
+    <h2 style="text-align:center; color:var(--brown); border-bottom:4px solid var(--gold); padding-bottom:10px;">SHANTI JEWEL</h2>
+    <div id="c_imgs" style="text-align:center; margin:15px 0;"></div>
+    <div style="font-size:22px; line-height:1.6;">
+        <b>ORDER ID:</b> #<span id="c_id"></span><br>
+        <b>PARTY:</b> <span id="c_pa"></span><br>
+        <b>WEIGHT:</b> <span id="c_wt"></span>g<br>
+        <div style="margin-top:10px; border:1px solid #ddd; padding:10px;">
+            <b>NOTES:</b><br><span id="c_sp"></span>
         </div>
     </div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="nav('add', this)">NEW</div>
-    <div class="tab" onclick="nav('status', this)">WORKFLOW</div>
-    <div class="tab" onclick="nav('info', this)">ALL ORDERS</div>
+    <div class="tab active" onclick="nav('add', this)">PUNCH</div>
+    <div class="tab" onclick="nav('list', this)">PRODUCTION</div>
 </div>
 
 <script>
@@ -105,112 +81,108 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    
-    let currentImgs = [];
-    let nextOrderNum = 100;
-    const flow = ["CAD", "CAM", "CASTING", "POLISHING", "HUID", "READY"];
+    const depts = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
+    let photos = [];
 
-    function getNextId() {
-        db.ref('orders').limitToLast(1).once('value', (snap) => {
-            if (snap.exists()) {
-                const lastOrder = Object.values(snap.val())[0];
-                nextOrderNum = parseInt(lastOrder.id) + 1;
-            }
-            document.getElementById('nextIdLabel').innerText = "NEXT ORDER ID: #" + nextOrderNum;
-        });
-    }
-    getNextId();
-
-    function previewImages(e) {
+    function procImgs(e) {
         const files = Array.from(e.target.files).slice(0, 3);
-        currentImgs = [];
-        const container = document.getElementById('previews');
-        container.innerHTML = "";
+        photos = []; document.getElementById('pv').innerHTML = "";
         files.forEach(f => {
-            const reader = new FileReader();
-            reader.onload = (rs) => {
-                currentImgs.push(rs.target.result);
-                container.innerHTML += `<img src="${rs.target.result}" style="width:50px; height:50px; border-radius:5px; object-fit:cover;">`;
+            const r = new FileReader();
+            r.onload = ev => {
+                const img = new Image();
+                img.src = ev.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 600; canvas.height = (img.height/img.width)*600;
+                    canvas.getContext('2d').drawImage(img,0,0,600,canvas.height);
+                    const res = canvas.toDataURL("image/jpeg", 0.6);
+                    photos.push(res);
+                    document.getElementById('pv').innerHTML += `<img src="${res}" style="width:40px;height:40px;border-radius:4px;">`;
+                };
             };
-            reader.readAsDataURL(f);
+            r.readAsDataURL(f);
         });
-        document.getElementById('upMsg').innerText = files.length + " IMAGES LOADED";
     }
 
-    function nav(page, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(page + 'Page').classList.add('active');
+    function save() {
+        const id = document.getElementById('i_id').value;
+        if(!id || photos.length === 0) return alert("Order No & Photo Required");
+        db.ref('orders/' + id).set({
+            id: id, party: document.getElementById('i_pa').value || "-",
+            weight: document.getElementById('i_wt').value || "0",
+            specs: document.getElementById('i_sp').value || "None",
+            imgs: photos, status: "CAD", ts: Date.now()
+        }).then(() => { alert("Order Saved!"); location.reload(); });
+    }
+
+    function wipeData() {
+        const pass = prompt("Enter Admin Password to delete all orders:");
+        if(pass === "1234") {
+            if(confirm("Are you sure? This will delete EVERY order forever.")) {
+                db.ref('orders').remove().then(() => {
+                    alert("Database Cleared!");
+                    location.reload();
+                });
+            }
+        } else { alert("Wrong Password!"); }
+    }
+
+    function nav(p, el) {
+        document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.getElementById(p + 'Page').classList.add('active');
         el.classList.add('active');
-        if(page === 'status' || page === 'info') render();
+        if(p === 'list') load();
     }
 
-    function saveOrder() {
-        const party = document.getElementById('party').value;
-        if(!party || currentImgs.length === 0) return alert("ENTER DETAILS AND PHOTOS");
-        
-        const newId = nextOrderNum.toString();
-        db.ref('orders/' + newId).set({
-            id: newId, party, weight: document.getElementById('weight').value,
-            size: document.getElementById('size').value, date: document.getElementById('delDate').value,
-            specs: document.getElementById('specs').value, imgs: currentImgs, status: "CAD", ts: Date.now()
-        }).then(() => { alert("ORDER SAVED"); location.reload(); });
-    }
-
-    function render() {
-        db.ref('orders').on('value', (snap) => {
-            const data = snap.val();
-            const sList = document.getElementById('statusList');
-            const iList = document.getElementById('infoList');
-            sList.innerHTML = ""; iList.innerHTML = "";
-            if(!data) return;
-
-            Object.values(data).reverse().forEach(o => {
-                let steps = flow.map(s => `<div class="workflow-step" style="background:${o.status===s?'#D4AF37':'#eee'}; color:${o.status===s?'white':'#999'};">${s}</div>`).join(' > ');
-                
-                sList.innerHTML += `<div class="card">
-                    <b>ID: #${o.id} | ${o.party}</b>
-                    <div class="workflow-row">${steps}</div>
-                    <button class="btn btn-red" onclick="downloadCAD('${o.id}')">DOWNLOAD CAD FORM</button>
-                    <button class="btn btn-gold" onclick="updateStatus('${o.id}', '${o.status}')">MOVE NEXT STAGE</button>
-                </div>`;
-
-                iList.innerHTML += `<div class="card">
-                    <h3>ID: #${o.id} | ${o.party}</h3>
-                    <p>WEIGHT: ${o.weight}G | SIZE: ${o.size} | DUE: ${o.date}</p>
-                    <div style="display:flex; gap:5px; overflow-x:auto;">
-                        ${o.imgs.map(img => `<img src="${img}" style="height:80px; border-radius:5px;">`).join('')}
+    function load() {
+        db.ref('orders').on('value', s => {
+            const list = document.getElementById('mainList');
+            list.innerHTML = "";
+            const raw = s.val() || {};
+            const data = Object.values(raw).sort((a,b) => b.ts - a.ts);
+            data.forEach(o => {
+                const cur = o.status || "CAD";
+                let steps = depts.map(d => `<div class="s ${cur === d ? 'active' : ''}">${d}</div>`).join('');
+                list.innerHTML += `
+                <div class="card">
+                    <div style="display:flex; gap:10px;">
+                        <img src="${o.imgs ? o.imgs[0] : ''}" style="width:65px; height:65px; object-fit:cover; border-radius:6px;">
+                        <div style="flex:1"><b>#${o.id || 'N/A'}</b> - ${o.party || '-'}<br><small>Dept: ${cur}</small></div>
                     </div>
+                    <div class="flow-box">${steps}</div>
+                    <button class="btn btn-out" onclick="move('${o.id}', '${cur}')">MOVE NEXT ▶</button>
+                    <button class="btn btn-out" style="color:green; border-color:green;" onclick="down('${o.id}')">DOWNLOAD JPG</button>
                 </div>`;
             });
+            window.localData = data;
         });
     }
 
-    function updateStatus(id, current) {
-        const nextIdx = flow.indexOf(current) + 1;
-        if(nextIdx >= flow.length) return alert("ORDER READY");
-        if(confirm("MOVE TO " + flow[nextIdx] + "?")) {
-            db.ref('orders/' + id).update({status: flow[nextIdx]});
+    function move(id, cur) {
+        const idx = depts.indexOf(cur);
+        if(idx < depts.length - 1) {
+            db.ref('orders/' + id).update({ status: depts[idx + 1] });
         }
     }
 
-    function downloadCAD(id) {
-        db.ref('orders/' + id).once('value', (snap) => {
-            const o = snap.val();
-            document.getElementById('cId').innerText = o.id;
-            document.getElementById('cWt').innerText = o.weight;
-            document.getElementById('cSz').innerText = o.size;
-            document.getElementById('cDate').innerText = o.date;
-            document.getElementById('cSpecs').innerText = o.specs;
-            document.getElementById('cadImgBox').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
-
-            html2canvas(document.querySelector("#cadCanvas"), { scale: 2 }).then(canvas => {
+    function down(id) {
+        const o = window.localData.find(x => x.id === id);
+        if(!o) return;
+        document.getElementById('c_id').innerText = o.id;
+        document.getElementById('c_pa').innerText = o.party;
+        document.getElementById('c_wt').innerText = o.weight;
+        document.getElementById('c_sp').innerText = o.specs;
+        document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}" style="width:100%; margin-bottom:10px; border-radius:8px;">`).join('');
+        setTimeout(() => {
+            html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `CAD_JOB_${o.id}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 1.0);
+                link.download = `SJ_${o.id}.jpg`;
+                link.href = canvas.toDataURL("image/jpeg", 0.9);
                 link.click();
             });
-        });
+        }, 600);
     }
 </script>
 </body>
