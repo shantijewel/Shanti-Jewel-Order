@@ -8,51 +8,87 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --sj-red: #e53935; --sj-navy: #1a237e; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
+        :root { --sj-red: #e53935; --sj-navy: #1a237e; --gold: #D4AF37; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         .header { background: white; text-align: center; padding: 10px; border-bottom: 3px solid var(--sj-red); }
-        .header img { height: 50px; }
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .grid-container img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 1.5px solid #eee; }
+        input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: white; }
+        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .btn-red { background: var(--sj-red); color: white; }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
-        .tab { flex: 1; text-align: center; padding: 20px 5px; font-size: 12px; color: #999; }
-        .tab.active { color: var(--sj-red); border-top: 4px solid var(--sj-red); }
-        
-        /* Optimized Order Form for APK */
-        #formCanvas { background: white; width: 500px; height: 500px; padding: 20px; position: fixed; left: -10000px; border: 10px solid var(--sj-red); display: flex; flex-direction: column; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .grid-container img { width: 100%; height: 140px; object-fit: cover; border-radius: 5px; }
+        .btn-out { background: none; border: 1px solid var(--sj-navy); color: var(--sj-navy); margin-top: 8px; font-size: 12px; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
+        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 11px; color: #999; font-weight: bold; text-transform: uppercase; }
+        .tab.active { color: var(--sj-red); border-top: 4px solid var(--sj-red); background: #fff8f8; }
+        .step { background: #e0e0e0; padding: 6px 4px; border-radius: 4px; font-size: 8px; font-weight: bold; color: #777; flex: 1; text-align: center; }
+        .step.active { background: var(--sj-red); color: white; }
+        #formCanvas { background: white; width: 600px; height: 600px; padding: 25px; position: fixed; left: -5000px; border: 15px solid var(--sj-red); display: flex; flex-direction: column; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <!-- Replace with your hosted link for "Untitled design (1).png" -->
-    <div style="font-weight:bold; font-size:20px; color:var(--sj-red);">SHANTI JEWEL</div>
+    <div style="font-weight:bold; color:var(--sj-red); font-size:22px;">SHANTI JEWEL</div>
 </div>
 
 <div id="addPage" class="page active">
     <div class="card">
+        <div style="border:2px dashed var(--sj-navy); padding:20px; text-align:center; border-radius:10px; cursor:pointer;" onclick="document.getElementById('fIn').click()">
+            <span id="upMsg" style="font-weight:bold; color:var(--sj-navy);">UPLOAD DESIGN PHOTOS (MAX 4)</span>
+            <div id="pv" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; margin-top:15px;"></div>
+        </div>
+        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="processPhotos(event)">
+        
         <input type="text" id="i_id" placeholder="Order Number">
-        <input type="file" id="fIn" multiple accept="image/*" onchange="processPhotos(event)">
-        <div id="pv" style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:10px;"></div>
-        <button class="btn btn-red" onclick="saveOrder()">SAVE ORDER</button>
+        
+        <select id="i_pa">
+            <option value="">Select Party Name</option>
+            <option value="P.N.GADGIL & SONS LTD.">P.N.GADGIL & SONS LTD.</option>
+            <option value="PNG BROTHERS">PNG BROTHERS</option>
+            <option value="ANNAPURNA GOLD">ANNAPURNA GOLD</option>
+            <option value="NEELKANTH JEWELLERS">NEELKANTH JEWELLERS</option>
+            <option value="INHOUSE">INHOUSE</option>
+        </select>
+
+        <div style="display:flex; gap:10px;">
+            <input type="number" step="0.001" id="i_wt" placeholder="Weight" onblur="formatWeight(this)" onfocus="this.type='number'">
+            <input type="number" id="i_sz" placeholder="Size" onblur="formatSize(this)" onfocus="this.type='number'">
+        </div>
+        
+        <input type="date" id="i_dd">
+        
+        <select id="i_cad">
+            <option value="">Select CAD Worker</option>
+            <option value="DYE">DYE</option>
+            <option value="CHETAN SHINDE">CHETAN SHINDE</option>
+            <option value="ALAUDDIN">ALAUDDIN</option>
+        </select>
+        
+        <textarea id="i_sp" rows="3" placeholder="Production Instructions"></textarea>
+        <button class="btn btn-red" onclick="saveOrder()">PROCESS ORDER</button>
     </div>
 </div>
 
 <div id="listPage" class="page"><div id="mainList"></div></div>
 
-<!-- FORM FOR DOWNLOAD -->
+<!-- HIDDEN FORM CANVAS -->
 <div id="formCanvas">
-    <div style="text-align:center;">
-        <h2 style="color:var(--sj-navy); margin:0;">SHANTI JEWEL</h2>
-        <small>ORDER FORM</small>
+    <div style="text-align:center; border-bottom:3px solid var(--sj-navy); padding-bottom:10px; margin-bottom:10px;">
+         <div style="font-weight:bold; color:var(--sj-navy); font-size:36px;">SHANTI JEWEL</div>
+         <div style="font-weight:bold; color:var(--sj-red); letter-spacing:5px;">ORDER FORM</div>
     </div>
     <div id="c_imgs" class="grid-container"></div>
-    <div id="c_details" style="margin-top:15px; font-size:18px;"></div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:22px; border-top:2px solid #eee; padding-top:12px;">
+        <div><b>CAD:</b> <span id="c_cad"></span></div>
+        <div><b>WT:</b> <span id="c_wt"></span></div>
+        <div style="grid-column: span 2;"><b>SIZE:</b> <span id="c_sz"></span></div>
+    </div>
+    <div style="margin-top:10px; border:1px solid #ddd; padding:12px; border-radius:8px; background:#f9f9f9; font-size:20px; flex-grow:1;">
+        <b>NOTES:</b> <span id="c_sp"></span>
+    </div>
 </div>
 
 <div class="tab-bar">
@@ -61,7 +97,6 @@
 </div>
 
 <script>
-    // Use your existing Firebase Config here
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         projectId: "shanti-jewel-order",
@@ -71,20 +106,46 @@
     const db = firebase.database();
     let photos = [];
 
+    function formatWeight(el) {
+        if (el.value) {
+            let val = parseFloat(el.value);
+            el.type = "text";
+            el.value = val.toFixed(3) + "gms";
+        }
+    }
+
+    function formatSize(el) {
+        if (el.value) {
+            let val = el.value;
+            el.type = "text";
+            el.value = val + "NO.";
+        }
+    }
+
     function processPhotos(e) {
         const files = Array.from(e.target.files).slice(0, 4);
-        photos = [];
+        photos = []; document.getElementById('pv').innerHTML = "";
         files.forEach(f => {
             const r = new FileReader();
-            r.onload = ev => { photos.push(ev.target.result); };
+            r.onload = ev => {
+                photos.push(ev.target.result);
+                document.getElementById('pv').innerHTML += `<img src="${ev.target.result}" style="width:100%; border-radius:4px;">`;
+            };
             r.readAsDataURL(f);
         });
     }
 
     function saveOrder() {
         const id = document.getElementById('i_id').value;
-        if(!id) return alert("Enter Order ID");
-        db.ref('orders/' + id).set({ id, imgs: photos, ts: Date.now() }).then(() => location.reload());
+        if(!id || photos.length === 0) return alert("Required: ID and Photos");
+        db.ref('orders/' + id).set({
+            id: id, party: document.getElementById('i_pa').value,
+            weight: document.getElementById('i_wt').value,
+            size: document.getElementById('i_sz').value,
+            cadWorker: document.getElementById('i_cad').value,
+            specs: document.getElementById('i_sp').value,
+            imgs: photos, status: "CAD", ts: Date.now()
+        }).then(() => location.reload());
     }
 
     function nav(p, el) {
@@ -96,12 +157,13 @@
 
     function loadOrders() {
         db.ref('orders').on('value', s => {
-            const list = document.getElementById('mainList');
-            list.innerHTML = "";
+            const sList = document.getElementById('mainList');
+            sList.innerHTML = "";
             Object.values(s.val() || {}).forEach(o => {
-                list.innerHTML += `<div class="card">
-                    <b>ID: ${o.id}</b><br>
-                    <button class="btn btn-red" onclick="downloadForm('${o.id}')">DOWNLOAD FORM</button>
+                sList.innerHTML += `
+                <div class="card">
+                    <b>${o.id}</b> | ${o.party}<br>
+                    <button class="btn btn-out" onclick="downloadForm('${o.id}')">DOWNLOAD ORDER FORM</button>
                 </div>`;
             });
             window.activeData = s.val();
@@ -110,20 +172,26 @@
 
     function downloadForm(id) {
         const o = window.activeData[id];
+        document.getElementById('c_cad').innerText = o.cadWorker;
+        document.getElementById('c_wt').innerText = o.weight;
+        document.getElementById('c_sz').innerText = o.size;
+        document.getElementById('c_sp').innerText = o.specs;
         document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
         
         setTimeout(() => {
-            html2canvas(document.querySelector("#formCanvas"), { scale: 1.5, logging: false }).then(canvas => {
-                const dataUrl = canvas.toDataURL("image/jpeg");
-                const link = document.createElement('a');
-                link.href = dataUrl;
-                link.download = `SJ_${id}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }).catch(err => alert("Download failed: " + err));
-        }, 500);
+            html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
+                const imageData = canvas.toDataURL("image/jpeg");
+                const newWindow = window.open();
+                if(newWindow) {
+                    newWindow.document.write(`<body style="margin:0; background:#111; display:flex; flex-direction:column; align-items:center;">
+                        <img src="${imageData}" style="width:100%;">
+                        <p style="color:white; font-family:sans-serif; padding:20px;">Long-press image to Save to Gallery</p>
+                    </body>`);
+                }
+            });
+        }, 800);
     }
 </script>
 </body>
 </html>
+
