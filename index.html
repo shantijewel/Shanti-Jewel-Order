@@ -16,26 +16,25 @@
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--gold); border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        .flow-container { display: flex; gap: 4px; margin: 12px 0; overflow-x: auto; }
-        .step { background: #e0e0e0; padding: 6px 4px; border-radius: 4px; font-size: 8px; font-weight: bold; color: #777; flex: 1; text-align: center; }
-        .step.active { background: var(--gold); color: white; }
-
-        #formCanvas { background: white; width: 600px; height: 850px; padding: 25px; position: fixed; left: -5000px; border: 15px solid var(--gold); display: flex; flex-direction: column; box-sizing: border-box; }
-        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
-        .grid-container img { width: 100%; height: 220px; object-fit: cover; border-radius: 8px; border: 1.5px solid #eee; }
+        
+        /* 4-Slot Photo Grid */
+        .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .photo-box { border: 2px dashed var(--gold); height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; background: #fafafa; font-size: 12px; color: var(--brown); font-weight: bold; position: relative; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
 
         input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: white; }
         .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .btn-gold { background: var(--gold); color: white; }
         .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
+        
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
         .tab { flex: 1; text-align: center; padding: 25px 2px; font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
-        .wipe-btn { background: #fff; color: #f44336; border: 1px solid #f44336; padding: 10px; font-size: 10px; border-radius: 5px; margin-bottom: 15px; width: 100%; font-weight: bold; }
-        
-        /* NEW STYLING FOR APK UPLOAD BUTTON */
-        .apk-upload-btn { background: #eee; border: 2px dashed var(--gold); padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
+
+        /* Canvas (Hidden) */
+        #formCanvas { background: white; width: 600px; height: 850px; padding: 25px; position: fixed; left: -5000px; border: 15px solid var(--gold); box-sizing: border-box; }
+        .canvas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .canvas-grid img { width: 100%; height: 220px; object-fit: cover; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -45,17 +44,21 @@
     <div class="sub-header">ORDER PORTAL</div>
 </div>
 
+<!-- ADD ORDER PAGE -->
 <div id="addPage" class="page active">
     <div class="card">
-        <!-- TRIGGER FOR APK GALLERY -->
-        <div class="apk-upload-btn" onclick="document.getElementById('fIn').click()">
-            <span id="upMsg" style="font-weight:bold; color:var(--brown);">TAP TO SELECT PHOTOS (UP TO 4)</span>
-            <div id="pv" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; margin-top:15px;"></div>
+        <div class="photo-grid">
+            <div class="photo-box" id="p1" onclick="document.getElementById('f1').click()">+ PHOTO 1</div>
+            <div class="photo-box" id="p2" onclick="document.getElementById('f2').click()">+ PHOTO 2</div>
+            <div class="photo-box" id="p3" onclick="document.getElementById('f3').click()">+ PHOTO 3</div>
+            <div class="photo-box" id="p4" onclick="document.getElementById('f4').click()">+ PHOTO 4</div>
         </div>
-        
-        <!-- APK SPECIFIC ATTRIBUTES: multiple, accept="image/*" -->
-        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="processPhotos(this.files)">
-        
+
+        <input type="file" id="f1" accept="image/*" style="display:none" onchange="handleSingle(this, 'p1', 0)">
+        <input type="file" id="f2" accept="image/*" style="display:none" onchange="handleSingle(this, 'p2', 1)">
+        <input type="file" id="f3" accept="image/*" style="display:none" onchange="handleSingle(this, 'p3', 2)">
+        <input type="file" id="f4" accept="image/*" style="display:none" onchange="handleSingle(this, 'p4', 3)">
+
         <input type="text" id="i_id" placeholder="Order Number">
         <select id="i_pa">
             <option value="">Select Party Name</option>
@@ -66,10 +69,10 @@
             <option value="INHOUSE">INHOUSE</option>
         </select>
         <div style="display:flex; gap:10px;">
-            <input type="number" step="0.001" id="i_wt" placeholder="Weight" onblur="formatWeight(this)" onfocus="this.type='number'">
-            <input type="number" id="i_sz" placeholder="Size" onblur="formatSize(this)" onfocus="this.type='number'">
+            <input type="number" step="0.001" id="i_wt" placeholder="Weight (gms)">
+            <input type="number" id="i_sz" placeholder="Size (NO.)">
         </div>
-        <input type="date" id="i_dd" title="Delivery Date">
+        <input type="date" id="i_dd">
         <select id="i_cad">
             <option value="">Select CAD Worker</option>
             <option value="DYE">DYE</option>
@@ -82,30 +85,21 @@
 </div>
 
 <div id="listPage" class="page"><div id="mainList"></div></div>
+<div id="infoPage" class="page"><div id="currentInfoList"></div></div>
+<div id="pastPage" class="page"><div id="pastList"></div></div>
 
-<div id="infoPage" class="page">
-    <button class="wipe-btn" onclick="wipeDatabase()">ADMIN: WIPE ENTIRE DATABASE</button>
-    <input type="text" class="search-box" id="searchIn" placeholder="Search Current Orders..." onkeyup="filterOrders()">
-    <div id="currentInfoList"></div>
-</div>
-
-<div id="pastPage" class="page">
-    <div style="text-align:center; padding:10px; color:var(--brown); font-weight:bold;">COMPLETED ORDERS (31 Days)</div>
-    <div id="pastList"></div>
-</div>
-
+<!-- FORM CANVAS FOR DOWNLOAD -->
 <div id="formCanvas">
     <div style="text-align:center; border-bottom:5px solid #5d4037; padding-bottom:15px; margin-bottom:15px;">
-        <div style="font-family: sans-serif; font-size: 50px; font-weight: bold; color: #5d4037; letter-spacing: 4px; margin: 0;">SHANTI JEWEL</div>
-        <div style="font-family: sans-serif; font-size: 18px; letter-spacing: 14px; color: #D4AF37; font-weight: bold; margin-top: 5px;">ORDER PORTAL</div>
+        <div style="font-size: 50px; font-weight: bold; color: #5d4037;">SHANTI JEWEL</div>
     </div>
-    <div id="c_imgs" class="grid-container"></div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:24px; border-top:2px solid #eee; padding-top:15px; font-family: sans-serif;">
+    <div id="c_imgs" class="canvas-grid"></div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:24px; border-top:2px solid #eee; padding-top:15px;">
         <div><b>CAD:</b> <span id="c_cad"></span></div>
         <div><b>WT:</b> <span id="c_wt"></span></div>
         <div style="grid-column: span 2;"><b>SIZE:</b> <span id="c_sz"></span></div>
     </div>
-    <div style="margin-top:20px; border:1px solid #ddd; padding:15px; border-radius:8px; background:#f9f9f9; font-size:22px; flex-grow:1; font-family: sans-serif;">
+    <div style="margin-top:20px; border:1px solid #ddd; padding:15px; border-radius:8px; background:#f9f9f9; font-size:22px;">
         <b>NOTES:</b><br><span id="c_sp"></span>
     </div>
 </div>
@@ -127,35 +121,14 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const depts = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
-    let photos = [];
+    let photoData = [null, null, null, null];
 
-    function formatWeight(el) { if (el.value) { let val = parseFloat(el.value); el.type = "text"; el.value = val.toFixed(3) + "gms"; } }
-    function formatSize(el) { if (el.value) { let val = el.value; el.type = "text"; el.value = val + "NO."; } }
-
-    async function processPhotos(files) {
-        if (!files || files.length === 0) return;
-        const fileArr = Array.from(files).slice(0, 4);
-        photos = []; 
-        document.getElementById('pv').innerHTML = "";
-        document.getElementById('upMsg').innerText = "RESizing " + fileArr.length + " IMAGES...";
-
-        for (let file of fileArr) {
-            const dataUrl = await new Promise(r => {
-                const reader = new FileReader();
-                reader.onload = e => r(e.target.result);
-                reader.readAsDataURL(file);
-            });
-            const optimized = await resizeImage(dataUrl);
-            photos.push(optimized);
-            document.getElementById('pv').innerHTML += `<img src="${optimized}" style="width:100%; height:60px; object-fit:cover; border-radius:4px; border:1px solid var(--gold);">`;
-        }
-        document.getElementById('upMsg').innerText = photos.length + " IMAGES READY";
-    }
-
-    function resizeImage(dataUrl) {
-        return new Promise(r => {
+    async function handleSingle(input, previewId, index) {
+        if (!input.files || !input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
             const img = new Image();
-            img.src = dataUrl;
+            img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const max = 600;
@@ -163,22 +136,27 @@
                 if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                r(canvas.toDataURL("image/jpeg", 0.6)); // High compression for APK performance
+                const optimized = canvas.toDataURL("image/jpeg", 0.5);
+                photoData[index] = optimized;
+                document.getElementById(previewId).innerHTML = `<img src="${optimized}">`;
             };
-        });
+        };
+        reader.readAsDataURL(input.files[0]);
     }
 
     function saveOrder() {
         const id = document.getElementById('i_id').value;
-        if(!id || photos.length === 0) return alert("Order ID and Photos required");
+        const validPhotos = photoData.filter(p => p !== null);
+        if(!id || validPhotos.length === 0) return alert("Order ID and at least 1 Photo required");
+        
         db.ref('orders/' + id).set({
             id: id, party: document.getElementById('i_pa').value || "-",
-            weight: document.getElementById('i_wt').value || "0",
-            size: document.getElementById('i_sz').value || "-",
+            weight: document.getElementById('i_wt').value + "gms",
+            size: document.getElementById('i_sz').value + "NO.",
             dueDate: document.getElementById('i_dd').value || "9999-12-31",
             cadWorker: document.getElementById('i_cad').value || "-",
             specs: document.getElementById('i_sp').value || "None",
-            imgs: photos, status: "CAD", ts: Date.now()
+            imgs: validPhotos, status: "CAD", ts: Date.now()
         }).then(() => { alert("Order Saved!"); location.reload(); });
     }
 
@@ -191,17 +169,15 @@
 
     function loadOrders() {
         db.ref('orders').on('value', s => {
-            const sList = document.getElementById('mainList'), cList = document.getElementById('currentInfoList'), pList = document.getElementById('pastList');
-            if(!sList) return;
-            sList.innerHTML = ""; cList.innerHTML = ""; pList.innerHTML = "";
             const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
+            const sList = document.getElementById('mainList'), cList = document.getElementById('currentInfoList'), pList = document.getElementById('pastList');
+            sList.innerHTML = ""; cList.innerHTML = ""; pList.innerHTML = "";
+            
             data.forEach(o => {
                 const cur = o.status || "CAD";
-                const cardHtml = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> - ${o.party}<br><small>Due: ${o.dueDate}</small></div></div><div class="flow-container">${depts.map(d => `<div class="step ${cur === d ? 'active' : ''}">${d}</div>`).join('')}</div>`;
-                if(cur !== "READY") {
-                    sList.innerHTML += cardHtml + `<button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE NEXT</button><button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">DOWNLOAD FORM</button></div>`;
-                    cList.innerHTML += `<div class="card order-item" data-id="${o.id}"><b>${o.id}</b> | ${o.party}<br>Stage: ${o.status}</div>`;
-                } else { pList.innerHTML += cardHtml + `<div style="color:green; font-weight:bold; text-align:center;">COMPLETED</div></div>`; }
+                const card = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> - ${o.party}</div></div><button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT STAGE</button><button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">DOWNLOAD FORM</button></div>`;
+                if(cur !== "READY") sList.innerHTML += card;
+                else pList.innerHTML += card;
             });
             window.activeData = data;
         });
@@ -219,32 +195,15 @@
         document.getElementById('c_wt').innerText = o.weight;
         document.getElementById('c_sz').innerText = o.size;
         document.getElementById('c_sp').innerText = o.specs;
-        document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}" style="width:100%; height:220px; object-fit:cover;">`).join('');
+        document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
         
         setTimeout(() => {
-            html2canvas(document.querySelector("#formCanvas"), { scale: 2, useCORS: true }).then(canvas => {
+            html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
                 const img = canvas.toDataURL("image/jpeg", 0.9);
                 const w = window.open();
-                if(w) w.document.write(`<body style="margin:0;"><img src="${img}" style="width:100%;"><p style="text-align:center;">Long press image to save</p></body>`);
-                else alert("Allow popups to view form");
+                w.document.write(`<img src="${img}" style="width:100%;">`);
             });
-        }, 1000);
-    }
-
-    function filterOrders() {
-        const val = document.getElementById('searchIn').value.toLowerCase();
-        document.querySelectorAll('.order-item').forEach(item => {
-            item.style.display = item.getAttribute('data-id').toLowerCase().includes(val) ? "block" : "none";
-        });
-    }
-
-    function wipeDatabase() {
-        const pass = prompt("Admin Password:");
-        if(pass === "1234") {
-            if(confirm("Delete ALL data?")) {
-                db.ref('orders').remove().then(() => { alert("Database Cleared."); location.reload(); });
-            }
-        }
+        }, 500);
     }
 </script>
 </body>
