@@ -8,261 +8,121 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
-        
-        /* Header & Logo Integration */
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); }
-        .logo-text { font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 0; }
-        .sub-header { font-size: 12px; letter-spacing: 4px; color: var(--gold); }
-
+        :root { --sj-red: #e53935; --sj-navy: #1a237e; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
+        .header { background: white; text-align: center; padding: 10px; border-bottom: 3px solid var(--sj-red); }
+        .header img { height: 50px; }
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-red { background: var(--sj-red); color: white; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
+        .tab { flex: 1; text-align: center; padding: 20px 5px; font-size: 12px; color: #999; }
+        .tab.active { color: var(--sj-red); border-top: 4px solid var(--sj-red); }
         
-        /* Search Bar */
-        .search-box { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--gold); border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-
-        /* Workflow */
-        .flow-container { display: flex; gap: 4px; margin: 12px 0; overflow-x: auto; }
-        .step { background: #e0e0e0; padding: 6px 4px; border-radius: 4px; font-size: 8px; font-weight: bold; color: #777; flex: 1; text-align: center; }
-        .step.active { background: var(--gold); color: white; }
-
-        /* SQUARE Order Form for Mobile */
-        #formCanvas { background: white; width: 600px; height: 600px; padding: 20px; position: fixed; left: -5000px; border: 15px solid var(--gold); display: flex; flex-direction: column; justify-content: center; }
-        .form-imgs { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
-        .form-imgs img { width: 250px; height: 250px; object-fit: cover; border-radius: 10px; border: 2px solid #eee; }
-
-        /* UI Elements */
-        input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: white; }
-        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
-        .btn-gold { background: var(--gold); color: white; }
-        .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
-
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 11px; color: #999; font-weight: bold; text-transform: uppercase; }
-        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
+        /* Optimized Order Form for APK */
+        #formCanvas { background: white; width: 500px; height: 500px; padding: 20px; position: fixed; left: -10000px; border: 10px solid var(--sj-red); display: flex; flex-direction: column; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .grid-container img { width: 100%; height: 140px; object-fit: cover; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="logo-text">SHANTI JEWEL</div>
-    <div class="sub-header">ORDER PORTAL</div>
+    <!-- Replace with your hosted link for "Untitled design (1).png" -->
+    <div style="font-weight:bold; font-size:20px; color:var(--sj-red);">SHANTI JEWEL</div>
 </div>
 
-<!-- TAB 1: PUNCH -->
 <div id="addPage" class="page active">
     <div class="card">
-        <div style="border:2px dashed #ccc; padding:20px; text-align:center; border-radius:10px;" onclick="document.getElementById('fIn').click()">
-            <span id="upMsg">ADD DESIGN PHOTOS</span>
-            <div id="pv" style="display:flex; gap:8px; justify-content:center; margin-top:10px;"></div>
-        </div>
-        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="processPhotos(event)">
-        
         <input type="text" id="i_id" placeholder="Order Number">
-        <input type="text" id="i_pa" placeholder="Party Name">
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="i_wt" placeholder="Weight (g)">
-            <input type="text" id="i_sz" placeholder="Size">
-        </div>
-        <input type="date" id="i_dd" title="Delivery Date">
-        
-        <select id="i_cad">
-            <option value="">Select CAD Worker</option>
-            <option value="DYE">DYE</option>
-            <option value="CHETAN SHINDE">CHETAN SHINDE</option>
-            <option value="ALAUDDIN">ALAUDDIN</option>
-        </select>
-
-        <textarea id="i_sp" rows="3" placeholder="Production Instructions"></textarea>
-        <button class="btn btn-gold" onclick="saveOrder()">PROCESS ORDER</button>
-    </div>
-
-    <div style="text-align:center; margin-top:20px;">
-        <button class="btn" style="background:#fbe9e7; color:#d73925; border:1px solid #d73925; padding:8px; width:auto; font-size:10px;" onclick="wipeDatabase()">WIPE DATABASE</button>
+        <input type="file" id="fIn" multiple accept="image/*" onchange="processPhotos(event)">
+        <div id="pv" style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:10px;"></div>
+        <button class="btn btn-red" onclick="saveOrder()">SAVE ORDER</button>
     </div>
 </div>
 
-<!-- TAB 2: PRODUCTION -->
 <div id="listPage" class="page"><div id="mainList"></div></div>
 
-<!-- TAB 3: ALL ORDERS -->
-<div id="infoPage" class="page">
-    <input type="text" class="search-box" id="searchIn" placeholder="Search by Order Number..." onkeyup="filterOrders()">
-    <div id="fullInfoList"></div>
-</div>
-
-<!-- SQUARE ORDER FORM CANVAS -->
+<!-- FORM FOR DOWNLOAD -->
 <div id="formCanvas">
-    <div style="text-align:center; border-bottom:4px solid var(--brown); padding-bottom:10px;">
-        <h1 style="color:var(--brown); margin:0; font-size:38px;">SHANTI JEWEL</h1>
-        <p style="letter-spacing:8px; margin:5px 0; color:var(--gold); font-weight:bold; font-size:14px;">PRODUCTION SPECIFICATIONS</p>
+    <div style="text-align:center;">
+        <h2 style="color:var(--sj-navy); margin:0;">SHANTI JEWEL</h2>
+        <small>ORDER FORM</small>
     </div>
-    
-    <div id="c_imgs" class="form-imgs"></div>
-    
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:20px; border-top:2px solid #eee; padding-top:15px;">
-        <div><b>CAD:</b> <span id="c_cad"></span></div>
-        <div><b>WT:</b> <span id="c_wt"></span>g</div>
-        <div><b>SIZE:</b> <span id="c_sz"></span></div>
-        <div><b>DUE:</b> <span id="c_dd"></span></div>
-    </div>
-    
-    <div style="margin-top:15px; border:1px solid #ddd; padding:15px; border-radius:8px; background:#f9f9f9; flex-grow:1;">
-        <b style="font-size:18px;">INSTRUCTIONS:</b><br>
-        <div id="c_sp" style="font-size:18px; margin-top:5px;"></div>
-    </div>
+    <div id="c_imgs" class="grid-container"></div>
+    <div id="c_details" style="margin-top:15px; font-size:18px;"></div>
 </div>
 
 <div class="tab-bar">
     <div class="tab active" onclick="nav('add', this)">PUNCH</div>
     <div class="tab" onclick="nav('list', this)">PRODUCTION</div>
-    <div class="tab" onclick="nav('info', this)">ALL ORDERS</div>
 </div>
 
 <script>
+    // Use your existing Firebase Config here
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
-        authDomain: "shanti-jewel-order.firebaseapp.com",
         projectId: "shanti-jewel-order",
         databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const depts = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
-    let currentPhotos = [];
+    let photos = [];
 
     function processPhotos(e) {
-        const files = Array.from(e.target.files).slice(0, 2);
-        currentPhotos = []; document.getElementById('pv').innerHTML = "";
+        const files = Array.from(e.target.files).slice(0, 4);
+        photos = [];
         files.forEach(f => {
             const r = new FileReader();
-            r.onload = ev => {
-                const img = new Image();
-                img.src = ev.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 500; canvas.height = 500;
-                    canvas.getContext('2d').drawImage(img,0,0,500,500);
-                    const res = canvas.toDataURL("image/jpeg", 0.7);
-                    currentPhotos.push(res);
-                    document.getElementById('pv').innerHTML += `<img src="${res}" style="width:40px;height:40px;border-radius:4px;">`;
-                };
-            };
+            r.onload = ev => { photos.push(ev.target.result); };
             r.readAsDataURL(f);
         });
     }
 
     function saveOrder() {
         const id = document.getElementById('i_id').value;
-        if(!id || currentPhotos.length === 0) return alert("Order ID and Photos required");
-        db.ref('orders/' + id).set({
-            id: id, 
-            party: document.getElementById('i_pa').value || "-",
-            weight: document.getElementById('i_wt').value || "0",
-            size: document.getElementById('i_sz').value || "-",
-            dueDate: document.getElementById('i_dd').value || "9999-12-31",
-            cadWorker: document.getElementById('i_cad').value || "-",
-            specs: document.getElementById('i_sp').value || "None",
-            imgs: currentPhotos, 
-            status: "CAD", 
-            ts: Date.now()
-        }).then(() => location.reload());
+        if(!id) return alert("Enter Order ID");
+        db.ref('orders/' + id).set({ id, imgs: photos, ts: Date.now() }).then(() => location.reload());
     }
 
     function nav(p, el) {
-        document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.page, .tab').forEach(x => x.classList.remove('active'));
         document.getElementById(p + 'Page').classList.add('active');
         el.classList.add('active');
-        if(p !== 'add') loadOrders();
+        if(p === 'list') loadOrders();
     }
 
     function loadOrders() {
         db.ref('orders').on('value', s => {
-            const sList = document.getElementById('mainList');
-            const iList = document.getElementById('fullInfoList');
-            sList.innerHTML = ""; iList.innerHTML = "";
-            const raw = Object.values(s.val() || {});
-            
-            // Sort by Due Date (Closest first)
-            const data = raw.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-            data.forEach(o => {
-                const cur = o.status || "CAD";
-                let steps = depts.map(d => `<div class="step ${cur === d ? 'active' : ''}">${d}</div>`).join('');
-                
-                // Production Tab (No Hashtag)
-                sList.innerHTML += `
-                <div class="card">
-                    <div style="display:flex; gap:12px;">
-                        <img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
-                        <div style="flex:1"><b>${o.id}</b> - ${o.party}<br><small>Due: ${o.dueDate}</small></div>
-                    </div>
-                    <div class="flow-container">${steps}</div>
-                    <button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">NEXT DEPARTMENT</button>
-                    <button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">CAD FORM</button>
-                </div>`;
-
-                // All Orders Tab (With Image and All Details)
-                iList.innerHTML += `
-                <div class="card order-item" data-id="${o.id}">
-                    <div style="display:flex; gap:15px;">
-                        <img src="${o.imgs[0]}" style="width:90px; height:90px; object-fit:cover; border-radius:8px;">
-                        <div style="flex:1">
-                            <b style="font-size:18px;">${o.id}</b><br>
-                            <b>Party:</b> ${o.party}<br>
-                            <b>Weight:</b> ${o.weight}g | <b>Size:</b> ${o.size}<br>
-                            <b>Worker:</b> ${o.cadWorker}<br>
-                            <b>Due:</b> <span style="color:red; font-weight:bold;">${o.dueDate}</span>
-                        </div>
-                    </div>
-                    <div style="margin-top:10px; font-size:13px; background:#f4f4f4; padding:8px; border-radius:5px;">${o.specs}</div>
+            const list = document.getElementById('mainList');
+            list.innerHTML = "";
+            Object.values(s.val() || {}).forEach(o => {
+                list.innerHTML += `<div class="card">
+                    <b>ID: ${o.id}</b><br>
+                    <button class="btn btn-red" onclick="downloadForm('${o.id}')">DOWNLOAD FORM</button>
                 </div>`;
             });
-            window.activeData = data;
+            window.activeData = s.val();
         });
-    }
-
-    function filterOrders() {
-        const val = document.getElementById('searchIn').value.toLowerCase();
-        document.querySelectorAll('.order-item').forEach(item => {
-            const id = item.getAttribute('data-id').toLowerCase();
-            item.style.display = id.includes(val) ? "block" : "none";
-        });
-    }
-
-    function moveNext(id, cur) {
-        const idx = depts.indexOf(cur);
-        if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1] });
     }
 
     function downloadForm(id) {
-        const o = window.activeData.find(x => x.id === id);
-        if(!o) return;
-        // CAD form removes Party and Order Number as requested
-        document.getElementById('c_cad').innerText = o.cadWorker;
-        document.getElementById('c_wt').innerText = o.weight;
-        document.getElementById('c_sz').innerText = o.size;
-        document.getElementById('c_dd').innerText = o.dueDate;
-        document.getElementById('c_sp').innerText = o.specs;
+        const o = window.activeData[id];
         document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
         
         setTimeout(() => {
-            html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
+            html2canvas(document.querySelector("#formCanvas"), { scale: 1.5, logging: false }).then(canvas => {
+                const dataUrl = canvas.toDataURL("image/jpeg");
                 const link = document.createElement('a');
-                link.download = `CAD_${o.id}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
+                link.href = dataUrl;
+                link.download = `SJ_${id}.jpg`;
+                document.body.appendChild(link);
                 link.click();
-            });
-        }, 600);
-    }
-
-    function wipeDatabase() {
-        if(prompt("Password:") === "2215") {
-            if(confirm("Delete All?")) db.ref('orders').remove().then(() => location.reload());
-        }
+                document.body.removeChild(link);
+            }).catch(err => alert("Download failed: " + err));
+        }, 500);
     }
 </script>
 </body>
