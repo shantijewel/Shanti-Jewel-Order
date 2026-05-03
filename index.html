@@ -6,23 +6,22 @@
     <title>Shanti Jewel ERP</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --gold: #D4AF37; --brown: #8B735B; --bg: #f4f7f6; --green: #2ecc71; --grey: #bdc3c7; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
         
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; font-weight: bold; }
+        .header { background: var(--brown); color: white; text-align: center; padding: 15px; font-weight: bold; font-size: 1.2em; }
         
         /* Progress Line for Pending Orders */
-        .progress-line { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-size: 9px; font-weight: bold; color: var(--grey); overflow-x: auto; padding-bottom: 5px;}
-        .p-step { white-space: nowrap; margin-right: 5px; }
-        .p-step.active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+        .progress-line { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-size: 9px; font-weight: bold; color: var(--grey); }
+        .p-step { position: relative; }
+        .p-step.active { color: var(--gold); }
         .p-step.done { color: var(--green); }
 
         /* Multi-Image Slot */
-        .upload-slot { border: 2px dashed var(--gold); border-radius: 12px; padding: 20px; text-align: center; background: #fff9e6; }
-        .preview-strip { display: flex; gap: 5px; margin-top: 10px; overflow-x: auto; justify-content: center; }
-        .preview-strip img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .upload-slot { border: 2px dashed var(--gold); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #fff9e6; }
+        .preview-strip { display: flex; gap: 5px; margin-top: 10px; overflow-x: auto; }
+        .preview-strip img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
 
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
@@ -33,51 +32,181 @@
         .order-flex { display: flex; gap: 12px; }
         .order-flex img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
         
-        /* Tab Bar */
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; z-index: 1000; }
         .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; }
         .tab.active { color: var(--gold); border-top: 3px solid var(--gold); }
 
-        .btn-download { background: var(--brown); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
-
-        /* HIDDEN CANVAS FOR IMAGE GENERATION */
-        #hidden-form-container { position: absolute; left: -9999px; top: 0; }
-        .cad-form-design { width: 400px; background: white; padding: 20px; border: 2px solid var(--gold); }
-        .form-logo { font-size: 24px; font-weight: bold; color: var(--brown); text-align: center; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
-        .form-sub { text-align: center; font-size: 14px; margin: 5px 0 15px 0; letter-spacing: 2px; }
-        .form-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 4px;}
-        .form-imgs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .form-imgs img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 5px; }
+        .btn-share { background: #25D366; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="header">SHANTI JEWEL ERP</div>
+<div class="header">SHANTI JEWEL</div>
 
+<!-- PAGE: PUNCH NEW -->
 <div id="addPage" class="page active">
     <div class="card">
-        <h3 style="margin-top:0; color:var(--brown)">New Entry</h3>
+        <h3 style="margin-top:0; color:var(--brown)">New Order Entry</h3>
         <div class="upload-slot" onclick="document.getElementById('imageInput').click()">
-            <div id="uploadPlaceholder">📸 <b>TAP TO UPLOAD IMAGES</b></div>
+            <div id="uploadPlaceholder">📸 <b>TAP TO ADD IMAGES</b><br><small>You can select up to 3 photos</small></div>
             <div id="imgPreviewStrip" class="preview-strip"></div>
         </div>
         <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="processImages(event)">
         
-        <input type="text" id="orderId" placeholder="Order / Bill ID">
+        <input type="text" id="orderId" placeholder="Order / Bill Number">
         <input type="text" id="party" placeholder="Party Name">
         <div style="display:flex; gap:10px;">
             <input type="text" id="weight" placeholder="Weight">
             <input type="text" id="size" placeholder="Size">
         </div>
-        <input type="date" id="dueDate">
-        <textarea id="specs" rows="3" placeholder="Special Instructions for CAD/CAM..."></textarea>
+        <input type="date" id="dueDate" placeholder="Delivery Date">
+        <textarea id="specs" rows="3" placeholder="Diamonds, Metal Purity, Polish type..."></textarea>
         
-        <button onclick="saveOrder()" style="background:var(--gold); color:white; border:none; width:100%; padding:15px; margin-top:15px; border-radius:8px; font-weight:bold;">PUNCH ORDER</button>
+        <button onclick="saveOrder()" style="background:var(--gold); color:white; border:none; width:100%; padding:15px; margin-top:15px; border-radius:8px; font-weight:bold; font-size:16px;">PUNCH TO WORKFLOW</button>
     </div>
 </div>
 
+<!-- PAGE: PENDING LIST -->
 <div id="listPage" class="page">
+    <div style="margin-bottom:15px;">
+        <input type="text" id="search" placeholder="🔍 Search Party or Order ID..." onkeyup="renderPending()">
+    </div>
     <div id="pendingContainer"></div>
 </div>
 
-<div id="hidden-
+<div class="tab-bar">
+    <div class="tab active" onclick="switchTab('add', this)"><span>➕</span>NEW</div>
+    <div class="tab" onclick="switchTab('list', this)"><span>📦</span>PENDING ORDERS</div>
+</div>
+
+<script>
+    // Config same as before
+    const firebaseConfig = {
+        apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
+        authDomain: "shanti-jewel-order.firebaseapp.com",
+        projectId: "shanti-jewel-order",
+        databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    let tempImages = [];
+    const stages = ["CAD", "CAM", "Casting", "Polishing", "HUID", "Ready"];
+
+    function switchTab(p, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(p + 'Page').classList.add('active');
+        if(p === 'list') renderPending();
+    }
+
+    async function processImages(e) {
+        const files = Array.from(e.target.files).slice(0, 3);
+        const strip = document.getElementById('imgPreviewStrip');
+        const placeholder = document.getElementById('uploadPlaceholder');
+        strip.innerHTML = "";
+        tempImages = [];
+
+        for (let f of files) {
+            const base64 = await compress(f);
+            tempImages.push(base64);
+            const img = document.createElement('img');
+            img.src = base64;
+            strip.appendChild(img);
+        }
+        placeholder.innerHTML = `✅ ${tempImages.length} Images Loaded`;
+    }
+
+    function compress(file) {
+        return new Promise(res => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = 600 / img.width;
+                    canvas.width = 600; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    res(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function saveOrder() {
+        const id = document.getElementById('orderId').value;
+        const party = document.getElementById('party').value;
+        const due = document.getElementById('dueDate').value;
+        if(!id || !party || !due) return alert("Missing ID, Party or Due Date");
+
+        const order = {
+            id, party, due,
+            weight: document.getElementById('weight').value,
+            size: document.getElementById('size').value,
+            specs: document.getElementById('specs').value,
+            photos: tempImages,
+            status: "CAD",
+            ts: Date.now()
+        };
+
+        db.ref('orders/' + id).set(order).then(() => {
+            alert("Order Punched!");
+            location.reload();
+        });
+    }
+
+    function renderPending() {
+        const search = document.getElementById('search').value.toLowerCase();
+        db.ref('orders').on('value', snap => {
+            const container = document.getElementById('pendingContainer');
+            container.innerHTML = "";
+            let data = Object.values(snap.val() || {});
+            
+            // SORT BY DUE DATE (Soonest at top)
+            data.sort((a,b) => new Date(a.due) - new Date(b.due));
+
+            data.forEach(o => {
+                if(o.party.toLowerCase().includes(search) || o.id.includes(search)) {
+                    const card = document.createElement('div');
+                    card.className = 'order-item';
+                    
+                    // Generate Progress Line HTML
+                    let progressHtml = stages.map(s => {
+                        let cls = (s === o.status) ? 'active' : (stages.indexOf(s) < stages.indexOf(o.status) ? 'done' : '');
+                        let icon = cls === 'done' ? '✓' : '';
+                        return `<span class="p-step ${cls}">${icon}${s}</span>`;
+                    }).join(' ➔ ');
+
+                    card.innerHTML = `
+                        <div class="order-flex">
+                            <img src="${o.photos[0] || ''}">
+                            <div style="flex:1">
+                                <h4 style="margin:0">#${o.id} - ${o.party}</h4>
+                                <small><b>Due:</b> ${o.due} | <b>Wt:</b> ${o.weight}</small><br>
+                                <small><b>Size:</b> ${o.size}</small>
+                            </div>
+                        </div>
+                        <div class="progress-line">${progressHtml}</div>
+                        <button class="btn-share" onclick="shareOrder('${o.id}')">SEND ORDER FORM</button>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        });
+    }
+
+    function shareOrder(id) {
+        db.ref('orders/' + id).once('value', snap => {
+            const o = snap.val();
+            const msg = `*SHANTI JEWEL - ORDER FORM*%0A--------------------------%0A*ID:* ${o.id}%0A*PARTY:* ${o.party}%0A*WEIGHT:* ${o.weight}%0A*SIZE:* ${o.size}%0A*SPECS:* ${o.specs}%0A*DUE:* ${o.due}%0A--------------------------%0A_Image attached below_`;
+            // Note: Direct image sharing via web URL is restricted, so we send the data 
+            // and the sales person can attach the screenshot if needed.
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        });
+    }
+</script>
+</body>
+</html>
