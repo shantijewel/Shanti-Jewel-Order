@@ -8,12 +8,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; --red: #ff4444; }
+        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; --red: #d32f2f; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
         
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--brown); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .login-box { background: white; padding: 30px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; border-bottom: 5px solid var(--gold); }
-        .login-box h2 { color: var(--brown); margin-top: 0; font-size: 20px; }
         .login-box input { width: 100%; padding: 12px; border: 2px solid #ddd; text-align: center; letter-spacing: 8px; font-size: 24px; color: var(--brown); border-radius: 8px; box-sizing: border-box; }
 
         .header { background: var(--brown); color: white; text-align: center; padding: 10px; border-bottom: 3px solid var(--gold); }
@@ -25,7 +24,6 @@
         .page.active { display: block; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
         
-        /* Dashboard & Wipeout Styles */
         .wipeout-lock { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; margin-top: 20px; border: 1px solid #ddd; }
         .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .dash-item { background: var(--brown); color: white; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--gold); }
@@ -34,13 +32,9 @@
 
         .stats-banner { background: #fff; border: 1px solid var(--gold); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center; }
         .stats-banner b { display: block; font-size: 20px; color: var(--brown); }
-        .stats-banner span { font-size: 10px; color: #777; text-transform: uppercase; font-weight: bold; }
-
-        .party-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; font-size: 12px; margin-bottom: 20px; }
-        .party-table th { background: var(--brown); color: var(--gold); padding: 10px; text-align: left; }
-        .party-table td { padding: 10px; border-bottom: 1px solid #eee; }
-
-        .wipeout-utility { margin-top: 30px; padding: 15px; border: 2px dashed var(--red); border-radius: 12px; background: #fff5f5; text-align: center; }
+        
+        .wipeout-container { margin-top: 40px; padding: 20px; border: 3px dashed var(--red); border-radius: 15px; background: #fff5f5; text-align: center; }
+        .btn-wipeout { background: var(--red); color: white; padding: 20px; font-size: 16px; border: none; border-radius: 10px; font-weight: bold; width: 100%; box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3); }
 
         .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .photo-box { border: 2px dashed var(--gold); height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; background: #fafafa; font-size: 12px; color: var(--brown); font-weight: bold; }
@@ -49,14 +43,12 @@
         input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .btn-gold { background: var(--gold); color: white; }
-        .btn-red { background: var(--red); color: white; }
         .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
         
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; overflow-x: auto; }
-        .tab { flex: 1; min-width: 85px; text-align: center; padding: 25px 5px; font-size: 8px; color: #999; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
+        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 8px; color: #999; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
 
-        /* FORM CANVAS STYLES (EXACT BRANDING) */
         #formCanvas { background: white; width: 650px; padding: 40px; position: fixed; left: -5000px; border: 15px solid var(--gold); box-sizing: border-box; }
         .canvas-header { text-align: center; border-bottom: 5px solid var(--brown); padding-bottom: 20px; margin-bottom: 25px; }
         .canvas-shree { font-size: 24px; color: var(--gold); font-weight: bold; display: block; margin-bottom: 5px; }
@@ -65,8 +57,7 @@
         .canvas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         .canvas-grid img { width: 100%; height: 260px; object-fit: cover; border: 3px solid #eee; border-radius: 10px; }
         .canvas-table { width: 100%; font-size: 24px; border-collapse: collapse; }
-        .canvas-table td { padding: 15px 0; border-bottom: 2px solid #f0f0f0; color: #333; }
-        .canvas-footer { margin-top: 30px; padding-top: 15px; border-top: 2px solid var(--gold); font-size: 16px; color: #777; font-style: italic; }
+        .canvas-table td { padding: 15px 0; border-bottom: 2px solid #f0f0f0; }
     </style>
 </head>
 <body>
@@ -86,7 +77,6 @@
     <div class="sub-header">ORDER PORTAL</div>
 </div>
 
-<!-- PAGES (unchanged from previous version) -->
 <div id="punchPage" class="page active">
     <div class="card">
         <div class="photo-grid">
@@ -112,7 +102,6 @@
             <input type="number" step="0.001" id="i_wt" placeholder="Weight (gms)">
             <input type="number" id="i_sz" placeholder="Size (NO.)">
         </div>
-        <input type="date" id="i_dd">
         <select id="i_cad">
             <option value="">Select CAD Worker</option>
             <option value="DYE">DYE</option>
@@ -134,14 +123,14 @@
 <div id="dashPage" class="page">
     <div id="wipeoutLock" class="wipeout-lock">
         <h2 style="color:var(--brown); margin-top:0;">ADMIN ACCESS</h2>
-        <p style="font-size:12px; color:#666;">Enter password to view Wipeout Analytics</p>
         <input type="password" id="wipeoutPass" placeholder="••••" maxlength="4" style="width:100px; letter-spacing:4px; text-align:center;">
         <button class="btn btn-gold" style="margin-top:15px; width:150px;" onclick="unlockWipeout()">UNLOCK</button>
     </div>
+
     <div id="wipeoutContent" style="display:none;">
         <div class="stats-banner">
-            <div><b id="totalHandWt">0.00</b><span>In Hand (gms)</span></div>
-            <div><b id="totalDoneWt">0.00</b><span>Done (30 Days)</span></div>
+            <div><b id="totalHandWt">0.000</b><span>In Hand (gms)</span></div>
+            <div><b id="totalDoneWt">0.000</b><span>Done (30 Days)</span></div>
         </div>
         <div class="dash-grid">
             <div class="dash-item"><span class="dash-count" id="count-CAD">0</span><span class="dash-label">CAD</span></div>
@@ -151,17 +140,14 @@
             <div class="dash-item"><span class="dash-count" id="count-HUID">0</span><span class="dash-label">HUID</span></div>
             <div class="dash-item" style="background:green;"><span class="dash-count" id="count-READY">0</span><span class="dash-label">READY</span></div>
         </div>
-        <h3 style="font-size:14px; color:var(--brown); border-left:4px solid var(--gold); padding-left:10px;">PARTY BREAKDOWN</h3>
-        <table class="party-table"><tbody id="partyStatsBody"></tbody></table>
-        <div class="wipeout-utility">
-            <h3 style="color:var(--red); margin-top:0; font-size:14px;">DASHBOARD UTILITIES</h3>
-            <button class="btn btn-red" onclick="wipeAllData()">WIPE ALL DATA (CLEAR MEMORY)</button>
+        <table style="width:100%; font-size:12px; border-collapse: collapse; background:white; border-radius:10px;"><tbody id="partyStatsBody"></tbody></table>
+        <div class="wipeout-container">
+            <button class="btn-wipeout" onclick="wipeAllData()">WIPE ALL DATA (CLEAR MEMORY)</button>
         </div>
         <button class="btn btn-out" style="margin-top:20px;" onclick="lockDashboard()">EXIT & LOCK</button>
     </div>
 </div>
 
-<!-- BRANDED ORDER FORM CANVAS -->
 <div id="formCanvas">
     <div class="canvas-header">
         <span class="canvas-shree">IIश्रीII</span>
@@ -177,14 +163,13 @@
         <tr><td><b>CAD BY:</b></td><td id="c_cad"></td></tr>
         <tr><td><b>INSTRUCTION:</b></td><td id="c_sp" style="font-size:18px;"></td></tr>
     </table>
-    <div class="canvas-footer">Generated via Shanti Jewel Digital Portal</div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="nav('punch', this)">ORDER PUNCH IN</div>
-    <div class="tab" onclick="nav('production', this)">PRODUCTION</div>
-    <div class="tab" onclick="nav('active', this)">ACTIVE ORDERS</div>
-    <div class="tab" onclick="nav('past', this)">PAST ORDERS</div>
+    <div class="tab active" onclick="nav('punch', this)">PUNCH IN</div>
+    <div class="tab" onclick="nav('production', this)">PROD</div>
+    <div class="tab" onclick="nav('active', this)">ACTIVE</div>
+    <div class="tab" onclick="nav('past', this)">PAST</div>
     <div class="tab" onclick="nav('dash', this)">DASHBOARD</div>
 </div>
 
@@ -192,7 +177,12 @@
     function checkPass() { if(document.getElementById('passInput').value === '1008') { document.getElementById('loginOverlay').style.display = 'none'; loadOrders(); } else { alert("Incorrect"); } }
     function unlockWipeout() { if(document.getElementById('wipeoutPass').value === '2215') { document.getElementById('wipeoutLock').style.display = 'none'; document.getElementById('wipeoutContent').style.display = 'block'; } else { alert("Wrong Password"); } }
     function lockDashboard() { document.getElementById('wipeoutLock').style.display = 'block'; document.getElementById('wipeoutContent').style.display = 'none'; document.getElementById('wipeoutPass').value = ""; }
-    function wipeAllData() { if(confirm("Delete EVERYTHING?")) { if(confirm("Final Warning!")) { db.ref('orders').remove().then(() => location.reload()); } } }
+    
+    function wipeAllData() {
+        if(confirm("DANGER: Wipe all data?")) {
+            db.ref('orders').remove().then(() => { location.reload(); });
+        }
+    }
 
     const firebaseConfig = { apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU", authDomain: "shanti-jewel-order.firebaseapp.com", projectId: "shanti-jewel-order", databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
@@ -229,7 +219,7 @@
             status: "CAD", ts: Date.now(), imgs: valid, 
             cadWorker: document.getElementById('i_cad').value || "-",
             specs: document.getElementById('i_sp').value || "-"
-        }).then(() => { alert("Saved!"); location.reload(); });
+        }).then(() => { alert("Order Saved!"); location.reload(); });
     }
 
     function nav(p, el) {
@@ -266,8 +256,8 @@
         });
         document.getElementById('totalHandWt').innerText = hand.toFixed(3);
         document.getElementById('totalDoneWt').innerText = done.toFixed(3);
-        const tb = document.getElementById('partyStatsBody'); tb.innerHTML = "<thead><tr><th>Party</th><th>Pending</th><th>Recd (30D)</th></tr></thead>";
-        for(let p in pC) tb.innerHTML += `<tr><td>${p}</td><td>${pC[p].pending}</td><td>${pC[p].rec30}</td></tr>`;
+        const tb = document.getElementById('partyStatsBody'); tb.innerHTML = "<thead><tr style='background:var(--brown); color:var(--gold);'><th style='padding:8px;'>Party</th><th>Pending</th><th>30D</th></tr></thead>";
+        for(let p in pC) tb.innerHTML += `<tr style='border-bottom:1px solid #eee;'><td style='padding:8px;'>${p}</td><td>${pC[p].pending}</td><td>${pC[p].rec30}</td></tr>`;
     }
 
     function renderLists(data) {
@@ -282,12 +272,19 @@
 
     function moveNext(id, cur) { const idx = depts.indexOf(cur); if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1], ts: Date.now() }); }
     
+    // CRITICAL: UPDATED DOWNLOAD FORM WITH .000 AND NO.
     function downloadForm(id) {
         const o = window.fullData.find(x => x.id === id);
         document.getElementById('c_id').innerText = o.id;
         document.getElementById('c_pa').innerText = o.party;
-        document.getElementById('c_wt').innerText = o.weight + " gms";
-        document.getElementById('c_sz').innerText = o.size || "-";
+        
+        // FORMAT WEIGHT TO .000
+        const formattedWt = parseFloat(o.weight).toFixed(3);
+        document.getElementById('c_wt').innerText = formattedWt + " gms";
+        
+        // FORMAT SIZE WITH NO.
+        document.getElementById('c_sz').innerText = o.size ? o.size + " NO." : "-";
+        
         document.getElementById('c_cad').innerText = o.cadWorker || "-";
         document.getElementById('c_sp').innerText = o.specs || "-";
         document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
@@ -296,7 +293,7 @@
             html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => { 
                 const img = canvas.toDataURL("image/jpeg", 0.9); 
                 const w = window.open(); 
-                w.document.write(`<body style="margin:0; background:#333; display:flex; justify-content:center;"><img src="${img}" style="max-width:100%; height:auto; box-shadow:0 0 20px rgba(0,0,0,0.5);"></body>`); 
+                w.document.write(`<body style="margin:0; background:#333; text-align:center;"><img src="${img}" style="max-width:100%;"></body>`); 
             }); 
         }, 500);
     }
