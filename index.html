@@ -30,7 +30,7 @@
         .btn-gold { background: var(--gold); color: white; }
         .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 10px; color: #999; font-weight: bold; text-transform: uppercase; }
+        .tab { flex: 1; text-align: center; padding: 25px 2px; font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
     </style>
 </head>
@@ -79,16 +79,16 @@
 
 <div id="listPage" class="page"><div id="mainList"></div></div>
 
-<div id="readyPage" class="page">
-    <div style="text-align:center; padding:10px; color:var(--brown); font-weight:bold;">READY FOR DELIVERY (Auto-Wipe 31 Days)</div>
-    <div id="readyList"></div>
-</div>
-
 <div id="infoPage" class="page">
-    <input type="text" class="search-box" id="searchIn" placeholder="Search Order Number..." onkeyup="filterOrders()">
-    <div id="fullInfoList"></div>
+    <input type="text" class="search-box" id="searchIn" placeholder="Search Current Orders..." onkeyup="filterOrders()">
+    <div id="currentInfoList"></div>
     <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
     <div style="text-align:center;"><button class="btn" style="background:#fff; color:#f44336; border:1px solid #f44336; width:auto; font-size:10px; padding: 10px 20px;" onclick="wipeDatabase()">WIPE ENTIRE DATABASE</button></div>
+</div>
+
+<div id="pastPage" class="page">
+    <div style="text-align:center; padding:10px; color:var(--brown); font-weight:bold;">COMPLETED ORDERS (Past 31 Days)</div>
+    <div id="pastList"></div>
 </div>
 
 <div id="formCanvas">
@@ -110,8 +110,8 @@
 <div class="tab-bar">
     <div class="tab active" onclick="nav('add', this)">PUNCH</div>
     <div class="tab" onclick="nav('list', this)">PRODUCTION</div>
-    <div class="tab" onclick="nav('ready', this)">READY</div>
-    <div class="tab" onclick="nav('info', this)">ALL</div>
+    <div class="tab" onclick="nav('info', this)">CURRENT ORDERS</div>
+    <div class="tab" onclick="nav('past', this)">PAST ORDERS</div>
 </div>
 
 <script>
@@ -163,7 +163,7 @@
             specs: document.getElementById('i_sp').value || "None",
             imgs: photos, status: "CAD", ts: Date.now()
         }).then(() => {
-            alert("✅ SUCCESS: Order #" + id + " has been Punched!");
+            alert("✅ SUCCESS: Order #" + id + " Punched!");
             location.reload();
         });
     }
@@ -178,16 +178,16 @@
     function loadOrders() {
         db.ref('orders').on('value', s => {
             const sList = document.getElementById('mainList');
-            const rList = document.getElementById('readyList');
-            const iList = document.getElementById('fullInfoList');
-            sList.innerHTML = ""; rList.innerHTML = ""; iList.innerHTML = "";
-            const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
+            const cList = document.getElementById('currentInfoList');
+            const pList = document.getElementById('pastList');
+            sList.innerHTML = ""; cList.innerHTML = ""; pList.innerHTML = "";
             
+            const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
             const now = Date.now();
             const wipeLimit = 31 * 24 * 60 * 60 * 1000;
 
             data.forEach(o => {
-                // AUTO-WIPE LOGIC
+                // Auto-wipe PAST orders older than 31 days
                 if(o.status === "READY" && (now - o.ts) > wipeLimit) {
                     db.ref('orders/' + o.id).remove();
                     return;
@@ -195,17 +195,23 @@
 
                 const cur = o.status || "CAD";
                 let steps = depts.map(d => `<div class="step ${cur === d ? 'active' : ''}">${d}</div>`).join('');
-                let itemHtml = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;"><div style="flex:1"><b>${o.id}</b> - ${o.party}<br><small>Due: ${o.dueDate}</small></div></div><div class="flow-container">${steps}</div>`;
+                let itemCard = `
+                <div class="card">
+                    <div style="display:flex; gap:12px;">
+                        <img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
+                        <div style="flex:1"><b>${o.id}</b> - ${o.party}<br><small>Due: ${o.dueDate}</small></div>
+                    </div>
+                    <div class="flow-container">${steps}</div>`;
 
                 if(cur !== "READY") {
-                    itemHtml += `<button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT STAGE</button><button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">CAD ORDER FORM</button></div>`;
-                    sList.innerHTML += itemHtml;
+                    // Current active production
+                    sList.innerHTML += itemCard + `<button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT STAGE</button><button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">CAD ORDER FORM</button></div>`;
+                    
+                    cList.innerHTML += `<div class="card order-item" data-id="${o.id}"><div style="display:flex; gap:15px;"><img src="${o.imgs[0]}" style="width:90px; height:90px; object-fit:cover; border-radius:8px;"><div style="flex:1"><b>${o.id}</b> | ${o.party}<br><b>Wt:</b> ${o.weight} | <b>Size:</b> ${o.size}<br><b>Stage:</b> ${o.status}</div></div></div>`;
                 } else {
-                    itemHtml += `<div style="color:green; font-weight:bold; text-align:center; border:1.5px solid green; border-radius:8px; padding:10px; margin-top:5px;">✅ ORDER COMPLETED</div></div>`;
-                    rList.innerHTML += itemHtml;
+                    // Completed orders
+                    pList.innerHTML += itemCard + `<div style="color:green; font-weight:bold; text-align:center; border:1.5px solid green; border-radius:8px; padding:10px; margin-top:5px;">✅ COMPLETED</div></div>`;
                 }
-
-                iList.innerHTML += `<div class="card order-item" data-id="${o.id}"><div style="display:flex; gap:15px;"><img src="${o.imgs[0]}" style="width:90px; height:90px; object-fit:cover; border-radius:8px;"><div style="flex:1"><b>${o.id}</b> | ${o.party}<br><b>Wt:</b> ${o.weight} | <b>Size:</b> ${o.size}<br><b>Current:</b> ${o.status}</div></div></div>`;
             });
             window.activeData = data;
         });
@@ -216,7 +222,7 @@
         if(idx < depts.length - 1) {
             const nextDept = depts[idx + 1];
             db.ref('orders/' + id).update({ status: nextDept, ts: Date.now() }).then(() => {
-                alert("🚀 UPDATE: Order #" + id + " moved to " + nextDept);
+                alert("🚀 Order #" + id + " moved to " + nextDept);
             });
         }
     }
@@ -236,7 +242,6 @@
                 const newWindow = window.open();
                 if(newWindow) {
                     newWindow.document.write(`<body style="margin:0; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center;"><img src="${imageData}" style="width:100%;"><div style="padding:20px; color:white; text-align:center; font-family:sans-serif;"><h3>FORM READY</h3><p>Long-press image to Save.</p><button onclick="window.close()" style="padding:10px 20px; background:var(--gold); color:white; border:none; border-radius:5px;">BACK</button></div></body>`);
-                    alert("📥 Form Generated for Order #" + id);
                 }
             });
         }, 800);
@@ -251,16 +256,13 @@
     }
 
     function wipeDatabase() {
-        let pass = prompt("Admin Security: Enter Password to Wipe Database:");
-        if(pass === "2215") {
-            if(confirm("⚠️ CRITICAL: This will delete ALL orders. Proceed?")) {
+        if(prompt("Admin Password:") === "2215") {
+            if(confirm("⚠️ Delete ALL data?")) {
                 db.ref('orders').remove().then(() => {
-                    alert("🗑️ DATABASE WIPED SUCCESSFULLY.");
+                    alert("🗑️ DATABASE WIPED.");
                     location.reload();
                 });
             }
-        } else {
-            alert("❌ Incorrect Password.");
         }
     }
 </script>
