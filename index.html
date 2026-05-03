@@ -47,7 +47,8 @@
             <span id="upMsg" style="font-weight:bold;">TAP TO UPLOAD (UP TO 4 IMAGES)</span>
             <div id="pv" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; margin-top:15px;"></div>
         </div>
-        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="processPhotos(event)">
+        <!-- IMPORTANT: multiple attribute and onchange fix -->
+        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="processPhotos(this.files)">
         
         <input type="text" id="i_id" placeholder="Order Number">
         
@@ -129,26 +130,40 @@
     function formatWeight(el) { if (el.value) { let val = parseFloat(el.value); el.type = "text"; el.value = val.toFixed(3) + "gms"; } }
     function formatSize(el) { if (el.value) { let val = el.value; el.type = "text"; el.value = val + "NO."; } }
 
-    function processPhotos(e) {
-        const files = Array.from(e.target.files).slice(0, 4);
-        photos = []; document.getElementById('pv').innerHTML = "";
-        files.forEach(f => {
-            const r = new FileReader();
-            r.onload = ev => {
-                const img = new Image();
-                img.src = ev.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 400; canvas.height = 400;
-                    canvas.getContext('2d').drawImage(img,0,0,400,400);
-                    const res = canvas.toDataURL("image/jpeg", 0.6);
-                    photos.push(res);
-                    document.getElementById('pv').innerHTML += `<img src="${res}" style="width:100%; border-radius:4px; border:1px solid var(--gold);">`;
-                };
-            };
-            r.readAsDataURL(f);
+    async function processPhotos(files) {
+        const fileArr = Array.from(files).slice(0, 4);
+        photos = []; 
+        document.getElementById('pv').innerHTML = "";
+        
+        for (let file of fileArr) {
+            const dataUrl = await readFileAsDataURL(file);
+            const optimized = await resizeImage(dataUrl);
+            photos.push(optimized);
+            document.getElementById('pv').innerHTML += `<img src="${optimized}" style="width:100%; border-radius:4px; border:1px solid var(--gold);">`;
+        }
+        document.getElementById('upMsg').innerText = photos.length + " IMAGES SELECTED";
+    }
+
+    function readFileAsDataURL(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
         });
-        document.getElementById('upMsg').innerText = files.length + " IMAGES SELECTED";
+    }
+
+    function resizeImage(dataUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = dataUrl;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 400; canvas.height = 400;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, 400, 400);
+                resolve(canvas.toDataURL("image/jpeg", 0.7));
+            };
+        });
     }
 
     function saveOrder() {
@@ -187,7 +202,6 @@
             const wipeLimit = 31 * 24 * 60 * 60 * 1000;
 
             data.forEach(o => {
-                // Auto-wipe PAST orders older than 31 days
                 if(o.status === "READY" && (now - o.ts) > wipeLimit) {
                     db.ref('orders/' + o.id).remove();
                     return;
@@ -204,12 +218,9 @@
                     <div class="flow-container">${steps}</div>`;
 
                 if(cur !== "READY") {
-                    // Current active production
                     sList.innerHTML += itemCard + `<button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT STAGE</button><button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">CAD ORDER FORM</button></div>`;
-                    
                     cList.innerHTML += `<div class="card order-item" data-id="${o.id}"><div style="display:flex; gap:15px;"><img src="${o.imgs[0]}" style="width:90px; height:90px; object-fit:cover; border-radius:8px;"><div style="flex:1"><b>${o.id}</b> | ${o.party}<br><b>Wt:</b> ${o.weight} | <b>Size:</b> ${o.size}<br><b>Stage:</b> ${o.status}</div></div></div>`;
                 } else {
-                    // Completed orders
                     pList.innerHTML += itemCard + `<div style="color:green; font-weight:bold; text-align:center; border:1.5px solid green; border-radius:8px; padding:10px; margin-top:5px;">✅ COMPLETED</div></div>`;
                 }
             });
@@ -256,7 +267,7 @@
     }
 
     function wipeDatabase() {
-        if(prompt("Admin Password:") === "2215") {
+        if(prompt("Admin Password:") === "1234") {
             if(confirm("⚠️ Delete ALL data?")) {
                 db.ref('orders').remove().then(() => {
                     alert("🗑️ DATABASE WIPED.");
