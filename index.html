@@ -30,7 +30,7 @@
         .btn-gold { background: var(--gold); color: white; }
         .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 11px; color: #999; font-weight: bold; text-transform: uppercase; }
+        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 10px; color: #999; font-weight: bold; text-transform: uppercase; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
     </style>
 </head>
@@ -75,10 +75,14 @@
         <textarea id="i_sp" rows="3" placeholder="Production Instructions"></textarea>
         <button class="btn btn-gold" onclick="saveOrder()">PROCESS ORDER</button>
     </div>
-    <div style="text-align:center; margin-top:15px;"><button class="btn" style="background:#fff; color:#f44336; border:1px solid #f44336; width:auto; font-size:10px;" onclick="wipeDatabase()">WIPE DATABASE</button></div>
 </div>
 
 <div id="listPage" class="page"><div id="mainList"></div></div>
+
+<div id="readyPage" class="page">
+    <div style="text-align:center; padding:10px; color:var(--brown); font-weight:bold;">COMPLETED ORDERS (Last 31 Days)</div>
+    <div id="readyList"></div>
+</div>
 
 <div id="infoPage" class="page">
     <input type="text" class="search-box" id="searchIn" placeholder="Search Order Number..." onkeyup="filterOrders()">
@@ -104,7 +108,8 @@
 <div class="tab-bar">
     <div class="tab active" onclick="nav('add', this)">PUNCH</div>
     <div class="tab" onclick="nav('list', this)">PRODUCTION</div>
-    <div class="tab" onclick="nav('info', this)">ALL ORDERS</div>
+    <div class="tab" onclick="nav('ready', this)">READY</div>
+    <div class="tab" onclick="nav('info', this)">ALL</div>
 </div>
 
 <script>
@@ -119,21 +124,8 @@
     const depts = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
     let photos = [];
 
-    function formatWeight(el) {
-        if (el.value) {
-            let val = parseFloat(el.value);
-            el.type = "text";
-            el.value = val.toFixed(3) + "gms";
-        }
-    }
-
-    function formatSize(el) {
-        if (el.value) {
-            let val = el.value;
-            el.type = "text";
-            el.value = val + "NO.";
-        }
-    }
+    function formatWeight(el) { if (el.value) { let val = parseFloat(el.value); el.type = "text"; el.value = val.toFixed(3) + "gms"; } }
+    function formatSize(el) { if (el.value) { let val = el.value; el.type = "text"; el.value = val + "NO."; } }
 
     function processPhotos(e) {
         const files = Array.from(e.target.files).slice(0, 4);
@@ -168,7 +160,10 @@
             cadWorker: document.getElementById('i_cad').value || "-",
             specs: document.getElementById('i_sp').value || "None",
             imgs: photos, status: "CAD", ts: Date.now()
-        }).then(() => location.reload());
+        }).then(() => {
+            alert("SUCCESS: Order " + id + " has been Punched!");
+            location.reload();
+        });
     }
 
     function nav(p, el) {
@@ -181,47 +176,57 @@
     function loadOrders() {
         db.ref('orders').on('value', s => {
             const sList = document.getElementById('mainList');
+            const rList = document.getElementById('readyList');
             const iList = document.getElementById('fullInfoList');
-            sList.innerHTML = ""; iList.innerHTML = "";
-            const raw = Object.values(s.val() || {});
-            const data = raw.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+            sList.innerHTML = ""; rList.innerHTML = ""; iList.innerHTML = "";
+            const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
+            
+            const now = Date.now();
+            const wipeLimit = 31 * 24 * 60 * 60 * 1000;
 
             data.forEach(o => {
+                // Auto-wipe completed orders older than 31 days
+                if(o.status === "READY" && (now - o.ts) > wipeLimit) {
+                    db.ref('orders/' + o.id).remove();
+                    return;
+                }
+
                 const cur = o.status || "CAD";
                 let steps = depts.map(d => `<div class="step ${cur === d ? 'active' : ''}">${d}</div>`).join('');
-                sList.innerHTML += `
+                let itemHtml = `
                 <div class="card">
                     <div style="display:flex; gap:12px;">
                         <img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
                         <div style="flex:1"><b>${o.id}</b> - ${o.party}<br><small>Due: ${o.dueDate}</small></div>
                     </div>
-                    <div class="flow-container">${steps}</div>
-                    <button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">NEXT DEPARTMENT</button>
-                    <button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">CAD ORDER FORM</button>
-                </div>`;
-                iList.innerHTML += `
-                <div class="card order-item" data-id="${o.id}">
-                    <div style="display:flex; gap:15px;">
-                        <img src="${o.imgs[0]}" style="width:90px; height:90px; object-fit:cover; border-radius:8px;">
-                        <div style="flex:1"><b>${o.id}</b> | ${o.party}<br><b>Wt:</b> ${o.weight} | <b>Size:</b> ${o.size}<br><b>CAD:</b> ${o.cadWorker}<br><b style="color:red;">Due: ${o.dueDate}</b></div>
-                    </div>
-                </div>`;
+                    <div class="flow-container">${steps}</div>`;
+
+                if(cur !== "READY") {
+                    itemHtml += `<button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT STAGE</button>
+                                 <button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">CAD ORDER FORM</button></div>`;
+                    sList.innerHTML += itemHtml;
+                } else {
+                    itemHtml += `<div style="color:green; font-weight:bold; text-align:center; padding:5px;">COMPLETED</div></div>`;
+                    rList.innerHTML += itemHtml;
+                }
+
+                iList.innerHTML += `<div class="card order-item" data-id="${o.id}"><div style="display:flex; gap:15px;">
+                    <img src="${o.imgs[0]}" style="width:90px; height:90px; object-fit:cover; border-radius:8px;">
+                    <div style="flex:1"><b>${o.id}</b> | ${o.party}<br><b>Wt:</b> ${o.weight} | <b>Size:</b> ${o.size}<br><b>Status:</b> ${o.status}</div>
+                </div></div>`;
             });
             window.activeData = data;
         });
     }
 
-    function filterOrders() {
-        const val = document.getElementById('searchIn').value.toLowerCase();
-        document.querySelectorAll('.order-item').forEach(item => {
-            const id = item.getAttribute('data-id').toLowerCase();
-            item.style.display = id.includes(val) ? "block" : "none";
-        });
-    }
-
     function moveNext(id, cur) {
         const idx = depts.indexOf(cur);
-        if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1] });
+        if(idx < depts.length - 1) {
+            const nextDept = depts[idx + 1];
+            db.ref('orders/' + id).update({ status: nextDept, ts: Date.now() }).then(() => {
+                alert("CONFIRMED: Order " + id + " moved to " + nextDept);
+            });
+        }
     }
 
     function downloadForm(id) {
@@ -238,25 +243,23 @@
                 const imageData = canvas.toDataURL("image/jpeg", 0.9);
                 const newWindow = window.open();
                 if(newWindow) {
-                    newWindow.document.write(`
-                        <body style="margin:0; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                            <img src="${imageData}" style="width:100%; border-bottom:5px solid var(--gold);">
-                            <div style="padding:20px; color:white; text-align:center; font-family:sans-serif;">
-                                <h3>ORDER FORM READY</h3>
-                                <p>Long-press image to Save to Gallery.</p>
-                                <button onclick="window.close()" style="padding:10px 20px; background:var(--gold); color:white; border:none; border-radius:5px;">CLOSE</button>
-                            </div>
-                        </body>
-                    `);
+                    newWindow.document.write(`<body style="margin:0; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <img src="${imageData}" style="width:100%;">
+                        <div style="padding:20px; color:white; text-align:center; font-family:sans-serif;">
+                            <h3>FORM GENERATED</h3><p>Long-press image to Save to Gallery.</p>
+                            <button onclick="window.close()" style="padding:10px 20px; background:var(--gold); color:white; border:none; border-radius:5px;">CLOSE</button>
+                        </div></body>`);
                 }
             });
         }, 800);
     }
 
-    function wipeDatabase() {
-        if(prompt("Admin Password:") === "1234") {
-            if(confirm("Wipe all data?")) db.ref('orders').remove().then(() => location.reload());
-        }
+    function filterOrders() {
+        const val = document.getElementById('searchIn').value.toLowerCase();
+        document.querySelectorAll('.order-item').forEach(item => {
+            const id = item.getAttribute('data-id').toLowerCase();
+            item.style.display = id.includes(val) ? "block" : "none";
+        });
     }
 </script>
 </body>
