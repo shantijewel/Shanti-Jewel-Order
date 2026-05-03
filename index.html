@@ -3,126 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHANTI JEWEL OFFICIAL</title>
+    <title>SHANTI JEWEL - MASTER SYSTEM</title>
+    <!-- Firebase & Capture Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        :root { --gold: #D4AF37; --brown: #4e342e; --red: #d32f2f; --white: #ffffff; }
-        body { font-family: sans-serif; background: #f2f2f2; margin: 0; padding-bottom: 80px; }
+        :root { --gold: #D4AF37; --brown: #4e342e; --red: #d32f2f; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 80px; }
         
-        /* Layout */
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 4px solid var(--gold); }
-        .page { display: none; padding: 15px; }
+        /* UI Components */
+        .header { background: var(--brown); color: white; text-align: center; padding: 20px; border-bottom: 4px solid var(--gold); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .card { background: white; padding: 18px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
         /* Form Styling */
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
-        .btn { padding: 15px; border: none; border-radius: 5px; font-weight: bold; width: 100%; cursor: pointer; font-size: 14px; text-transform: uppercase; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; background: #fff; }
+        .btn { padding: 16px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
         .btn-gold { background: var(--gold); color: white; }
         .btn-red { background: var(--red); color: white; }
-        .btn-cam { background: #2e7d32; color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
 
-        /* Navigation */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
-        .tab { flex: 1; text-align: center; padding: 22px 5px; font-size: 12px; font-weight: bold; color: #999; cursor: pointer; }
-        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); }
+        /* Navigation Bar */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
+        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 13px; font-weight: bold; color: #aaa; cursor: pointer; }
+        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
         
-        /* Lists */
-        .list-img { width: 70px; height: 70px; object-fit: cover; border-radius: 5px; margin-right: 12px; border: 1px solid #eee; }
+        /* List Styling */
+        .list-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px; border: 1px solid #eee; }
+        
+        /* Overlay View */
+        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; overflow-y:auto; padding:20px; }
 
-        /* Red Download Canvas (A4 Portrait) */
-        #printArea { background: white; width: 794px; min-height: 1123px; padding: 40px; position: fixed; left: -9999px; border: 25px solid var(--red); color: var(--red); box-sizing: border-box; }
-        .p-head { text-align: center; border-bottom: 5px solid var(--red); padding-bottom: 20px; margin-bottom: 30px; }
-        .p-row { display: flex; justify-content: space-between; font-size: 26px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #ffcccc; padding-bottom: 5px; }
-
-        /* Full Details Overlay */
-        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:1000; overflow-y:auto; padding:20px; box-sizing:border-box; }
+        /* PRINT CANVAS (A4 Portrait) */
+        #printArea { background: white; width: 794px; min-height: 1123px; padding: 45px; position: fixed; left: -9999px; border: 30px solid var(--red); color: var(--red); box-sizing: border-box; }
+        .p-row { display: flex; justify-content: space-between; font-size: 28px; font-weight: bold; margin-bottom: 18px; border-bottom: 2px solid #ffcccc; padding-bottom: 5px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h2 style="margin:0;">SHANTI JEWEL</h2>
-    <small style="letter-spacing:2px; color:var(--gold);">ORDER MANAGEMENT</small>
+    <h1 style="margin:0; font-size: 24px; letter-spacing: 1px;">SHANTI JEWEL</h1>
+    <span style="font-size: 10px; color: var(--gold); font-weight: bold;">ORDER MANAGEMENT SYSTEM</span>
 </div>
 
-<!-- PAGE: PUNCH -->
-<div id="punch" class="page active">
+<!-- 1. PUNCH PAGE -->
+<div id="punchPage" class="page active">
     <div class="card">
-        <div style="border:2px dashed var(--gold); padding:20px; text-align:center; border-radius:10px; margin-bottom:15px;" onclick="document.getElementById('fileInput').click()">
-            <b id="statusTxt">ADD DESIGN PHOTOS</b>
-            <div id="prevBox" style="display:flex; gap:10px; justify-content:center; margin-top:10px;"></div>
+        <div style="border:2px dashed var(--gold); padding:30px; text-align:center; border-radius:12px; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
+            <b id="upTxt" style="color: var(--brown);">📸 CLICK TO ADD DESIGN PHOTOS</b>
+            <div id="prevBox" style="display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap: wrap;"></div>
         </div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(event)">
         
-        <input type="text" id="in_orderNo" placeholder="Order Number">
-        <input type="text" id="in_party" placeholder="Customer Name">
-        <select id="in_cat">
-            <option value="">Select Item</option>
-            <option>RING</option><option>EARRING</option><option>BRACLET</option>
-            <option>NECKLACE</option><option>PENDANT</option><option>KADA</option>
+        <input type="text" id="o_no" placeholder="Order Number (Required)">
+        <input type="text" id="o_party" placeholder="Party Name">
+        
+        <select id="o_cat">
+            <option value="">Select Category</option>
+            <option>RING</option><option>EARRING</option><option>PENDANT</option>
+            <option>NECKLACE</option><option>BRACELET</option><option>KADA</option>
         </select>
+
         <div style="display:flex; gap:10px;">
-            <input type="text" id="in_pur" placeholder="Purity">
-            <input type="number" id="in_pcs" placeholder="Pcs">
+            <input type="text" id="o_pur" placeholder="Purity (e.g. 22K)">
+            <input type="number" id="o_pcs" placeholder="Pcs">
         </div>
         <div style="display:flex; gap:10px;">
-            <input type="text" id="in_wt" placeholder="Weight (g)">
-            <input type="text" id="in_sz" placeholder="Size">
+            <input type="text" id="o_wt" placeholder="Weight (g)">
+            <input type="text" id="o_sz" placeholder="Size">
         </div>
-        <select id="in_wrk">
-            <option value="">Worker</option>
+        
+        <select id="o_wrk">
+            <option value="">Assign Worker</option>
             <option>ALAUDIN</option><option>CHETAN SHINDE</option><option>DYE</option>
         </select>
-        <textarea id="in_spc" rows="3" placeholder="Special Instructions"></textarea>
-        <button class="btn btn-gold" onclick="submitOrder()">PUNCH ORDER</button>
+        
+        <textarea id="o_spc" rows="3" placeholder="Special Manufacturing Instructions..."></textarea>
+        
+        <button class="btn btn-gold" onclick="saveOrder()">✅ PUNCH & SAVE ORDER</button>
     </div>
 </div>
 
-<!-- PAGE: WORKFLOW -->
-<div id="workflow" class="page"><div id="wfContainer"></div></div>
-
-<!-- PAGE: ALL ORDERS -->
-<div id="all" class="page">
-    <input type="text" id="searchBox" placeholder="Search Order No..." onkeyup="doSearch()" style="margin-bottom:15px;">
-    <div id="allContainer"></div>
+<!-- 2. WORKFLOW PAGE -->
+<div id="flowPage" class="page">
+    <h3 style="color: var(--brown); margin-left: 5px;">ACTIVE PRODUCTION</h3>
+    <div id="flowList"></div>
 </div>
 
-<!-- OVERLAY -->
+<!-- 3. ALL ORDERS PAGE -->
+<div id="allPage" class="page">
+    <input type="text" id="search" placeholder="🔍 Search Order Number or Party..." onkeyup="search()">
+    <div id="allList"></div>
+</div>
+
+<!-- FULL VIEW OVERLAY -->
 <div id="overlay">
-    <button class="btn btn-gold" style="width:auto; padding:10px 20px;" onclick="document.getElementById('overlay').style.display='none'">← BACK</button>
-    <div id="overlayContent"></div>
+    <button class="btn btn-outline" style="width:auto; margin-bottom: 20px;" onclick="document.getElementById('overlay').style.display='none'">⬅ BACK TO LIST</button>
+    <div id="overContent"></div>
 </div>
 
-<!-- HIDDEN PRINT AREA -->
+<!-- HIDDEN DOWNLOAD CANVAS -->
 <div id="printArea">
-    <div class="p-head">
-        <h1 style="font-size:70px; margin:0;">SHANTI JEWEL</h1>
-        <p style="letter-spacing:10px; font-size:22px; margin:5px 0;">ORDER FORM</p>
+    <div style="text-align:center; border-bottom:8px solid var(--red); padding-bottom:20px; margin-bottom:30px;">
+        <h1 style="font-size:85px; margin:0; font-family: serif;">SHANTI JEWEL</h1>
+        <p style="font-size:25px; letter-spacing:12px; margin: 10px 0;">PRODUCTION ORDER FORM</p>
     </div>
-    <div id="pImgs" style="text-align:center; margin-bottom:30px;"></div>
-    <div class="p-row"><span>ORDER NO:</span> <span id="out_no"></span></div>
-    <div class="p-row"><span>PARTY:</span> <span id="out_party"></span></div>
-    <div class="p-row"><span>CATEGORY:</span> <span id="out_cat"></span></div>
-    <div class="p-row"><span>PURITY:</span> <span id="out_pur"></span></div>
-    <div class="p-row"><span>WEIGHT:</span> <span id="out_wt"></span>g</div>
-    <div class="p-row"><span>PCS:</span> <span id="out_pcs"></span></div>
-    <div class="p-row"><span>SIZE:</span> <span id="out_sz"></span></div>
-    <div class="p-row"><span>WORKER:</span> <span id="out_wrk"></span></div>
-    <div style="margin-top:20px; border:3px solid var(--red); padding:15px; font-size:22px;">
-        <b>SPECS:</b> <span id="out_spc"></span>
+    <div id="pImgs" style="display:flex; justify-content:center; gap:15px; margin-bottom:40px;"></div>
+    
+    <div class="p-row"><span>ORDER NO:</span> <span id="p_no"></span></div>
+    <div class="p-row"><span>PARTY:</span> <span id="p_party"></span></div>
+    <div class="p-row"><span>CATEGORY:</span> <span id="p_cat"></span></div>
+    <div class="p-row"><span>PURITY:</span> <span id="p_pur"></span></div>
+    <div class="p-row"><span>TOTAL WEIGHT:</span> <span id="p_wt"></span></div>
+    <div class="p-row"><span>TOTAL PCS:</span> <span id="p_pcs"></span></div>
+    <div class="p-row"><span>SIZE:</span> <span id="p_sz"></span></div>
+    <div class="p-row"><span>ASSIGNED WORKER:</span> <span id="p_wrk"></span></div>
+    
+    <div style="border:5px solid var(--red); padding:25px; font-size:26px; margin-top:40px; min-height: 150px;">
+        <b style="text-decoration: underline;">SPECIAL SPECS:</b><br><br>
+        <span id="p_spc"></span>
     </div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('punch', this)">PUNCH</div>
-    <div class="tab" onclick="switchTab('workflow', this)">WORKFLOW</div>
-    <div class="tab" onclick="switchTab('all', this)">ALL ORDERS</div>
+    <div class="tab active" onclick="nav('punchPage', this)">PUNCH</div>
+    <div class="tab" onclick="nav('flowPage', this)">WORKFLOW</div>
+    <div class="tab" onclick="nav('allPage', this)">ALL ORDERS</div>
 </div>
 
 <script>
+    // Firebase Setup
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -130,170 +145,176 @@
         databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/"
     };
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    const db = firebase.database();
     
-    let base64Photos = [];
-    let currentData = [];
+    let photos = [];
+    let masterData = [];
 
+    // Image Handling
     function handleFiles(e) {
         const files = Array.from(e.target.files).slice(0, 3);
-        base64Photos = [];
-        const prev = document.getElementById('prevBox');
-        prev.innerHTML = "";
+        photos = [];
+        document.getElementById('prevBox').innerHTML = "";
         files.forEach(f => {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                base64Photos.push(ev.target.result);
-                prev.innerHTML += `<img src="${ev.target.result}" style="width:60px; height:60px; border-radius:5px; object-fit:cover;">`;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                photos.push(ev.target.result);
+                document.getElementById('prevBox').innerHTML += `<img src="${ev.target.result}" style="width:70px; height:70px; object-fit:cover; border-radius:5px; border:2px solid var(--gold);">`;
             };
-            reader.readAsDataURL(f);
+            r.readAsDataURL(f);
         });
     }
 
-    function submitOrder() {
-        const oNo = document.getElementById('in_orderNo').value;
-        if(!oNo || base64Photos.length === 0) return alert("Order Number and Photo Required");
+    // Save Logic
+    function saveOrder() {
+        const no = document.getElementById('o_no').value;
+        if(!no || photos.length === 0) return alert("Order Number and at least 1 Photo are mandatory.");
         
-        const timestamp = Date.now();
-        const data = {
-            orderNo: oNo,
-            party: document.getElementById('in_party').value || "-",
-            category: document.getElementById('in_cat').value || "-",
-            purity: document.getElementById('in_pur').value || "-",
-            pcs: document.getElementById('in_pcs').value || "0",
-            weight: document.getElementById('in_wt').value || "0",
-            size: document.getElementById('in_sz').value || "-",
-            worker: document.getElementById('in_wrk').value || "-",
-            specs: document.getElementById('in_spc').value || "No specs",
-            photos: base64Photos,
-            status: "CAD"
+        const orderData = {
+            orderNo: no,
+            party: document.getElementById('o_party').value || "-",
+            cat: document.getElementById('o_cat').value || "-",
+            pur: document.getElementById('o_pur').value || "-",
+            pcs: document.getElementById('o_pcs').value || "0",
+            wt: document.getElementById('o_wt').value || "0.00",
+            sz: document.getElementById('o_sz').value || "-",
+            wrk: document.getElementById('o_wrk').value || "-",
+            spc: document.getElementById('o_spc').value || "None",
+            img: photos,
+            status: "CAD",
+            date: new Date().toLocaleDateString()
         };
 
-        database.ref('orders/' + timestamp).set(data).then(() => {
-            alert("Order Punched!");
+        db.ref('orders/' + Date.now()).set(orderData).then(() => {
+            alert("Order Saved to Database!");
             location.reload();
         });
     }
 
-    function switchTab(id, el) {
+    // Navigation
+    function nav(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
-        if(id !== 'punch') fetchData();
+        if(id !== 'punchPage') loadData();
     }
 
-    function fetchData() {
-        database.ref('orders').on('value', (s) => {
-            const val = s.val();
-            if(!val) return;
-            currentData = Object.values(val).reverse();
-            render();
+    function loadData() {
+        db.ref('orders').on('value', s => {
+            const val = s.val() || {};
+            masterData = Object.values(val).reverse();
+            renderUI();
         });
     }
 
-    function render() {
-        const wf = document.getElementById('wfContainer');
-        const al = document.getElementById('allContainer');
-        wf.innerHTML = ""; al.innerHTML = "";
+    // Rendering Logic - Fixed for "Undefined"
+    function renderUI() {
+        const fl = document.getElementById('flowList');
+        const al = document.getElementById('allList');
+        fl.innerHTML = ""; al.innerHTML = "";
 
-        currentData.forEach(o => {
-            const firstImg = (o.photos && o.photos.length > 0) ? o.photos[0] : '';
+        masterData.forEach(o => {
+            const firstImg = (o.img && o.img.length > 0) ? o.img[0] : '';
             
-            wf.innerHTML += `<div class="card" style="display:flex; align-items:center;">
+            // Workflow List
+            fl.innerHTML += `<div class="card" style="display:flex; align-items:center;">
                 <img src="${firstImg}" class="list-img">
                 <div style="flex:1">
-                    <b>ORDER: ${o.orderNo}</b><br>
+                    <b style="font-size:18px;">#${o.orderNo}</b><br>
                     <small>STATUS: <span style="color:var(--red); font-weight:bold;">${o.status}</span></small>
-                    <div style="display:flex; gap:5px; margin-top:5px;">
-                        <button class="btn btn-red" style="padding:8px; font-size:10px; margin:0;" onclick="downloadJPG('${o.orderNo}')">DOWNLOAD</button>
-                        <button class="btn btn-cam" style="padding:8px; font-size:10px; margin:0;" onclick="moveStatus('${o.orderNo}')">TO CAM</button>
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button class="btn btn-red" style="padding:10px; font-size:11px;" onclick="downloadJPG('${o.orderNo}')">DOWNLOAD FORM</button>
+                        <button class="btn btn-outline" style="padding:10px; font-size:11px; color:black; border-color:#ccc;" onclick="updateStatus('${o.orderNo}')">MOVE TO CAM</button>
                     </div>
                 </div>
             </div>`;
 
-            al.innerHTML += `<div class="card" onclick="showFull('${o.orderNo}')" style="display:flex; align-items:center;">
+            // All Orders List
+            al.innerHTML += `<div class="card" onclick="viewDetails('${o.orderNo}')" style="display:flex; align-items:center;">
                 <img src="${firstImg}" class="list-img">
                 <div style="flex:1">
-                    <b>${o.orderNo}</b><br>
-                    <small>${o.party} | ${o.category} | ${o.weight}g</small><br>
-                    <small style="color:var(--gold); font-weight:bold;">VIEW ALL INFORMATION</small>
+                    <b>${o.orderNo}</b> - ${o.party}<br>
+                    <small>${o.cat} | ${o.wt}g | ${o.date}</small>
                 </div>
+                <div style="color:var(--gold);">▶</div>
             </div>`;
         });
     }
 
-    function showFull(no) {
-        const o = currentData.find(x => x.orderNo === no);
-        const content = document.getElementById('overlayContent');
+    function updateStatus(no) {
+        db.ref('orders').orderByChild('orderNo').equalTo(no).once('value', s => {
+            const key = Object.keys(s.val())[0];
+            db.ref('orders/' + key).update({ status: 'CAM' }).then(() => alert("Status Updated to CAM"));
+        });
+    }
+
+    function viewDetails(no) {
+        const o = masterData.find(x => x.orderNo === no);
+        const content = document.getElementById('overContent');
         content.innerHTML = `
-            <div style="display:flex; gap:10px; overflow-x:auto; margin-top:20px;">
-                ${o.photos.map(p => `<img src="${p}" style="width:100%; border-radius:10px; margin-bottom:10px; border:1px solid #ddd;">`).join('')}
+            <div style="display:flex; gap:10px; overflow-x:auto; margin-bottom:20px;">
+                ${o.img.map(i => `<img src="${i}" style="height:300px; border-radius:10px;">`).join('')}
             </div>
-            <h3 style="color:var(--brown); border-bottom:2px solid var(--gold); padding-bottom:5px;">ORDER DETAILS</h3>
-            <p><b>ORDER NO:</b> ${o.orderNo}</p>
-            <p><b>PARTY:</b> ${o.party}</p>
-            <p><b>CATEGORY:</b> ${o.category}</p>
-            <p><b>PURITY:</b> ${o.purity}</p>
-            <p><b>WEIGHT:</b> ${o.weight}g</p>
-            <p><b>PCS:</b> ${o.pcs}</p>
-            <p><b>SIZE:</b> ${o.size}</p>
-            <p><b>WORKER:</b> ${o.worker}</p>
-            <p><b>STATUS:</b> ${o.status}</p>
-            <p><b>SPECS:</b> ${o.specs}</p>
+            <h2 style="color:var(--brown); border-bottom:2px solid var(--gold);">ORDER #${o.orderNo}</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:16px;">
+                <p><b>PARTY:</b> ${o.party}</p><p><b>CATEGORY:</b> ${o.cat}</p>
+                <p><b>WEIGHT:</b> ${o.wt}g</p><p><b>PURITY:</b> ${o.pur}</p>
+                <p><b>PCS:</b> ${o.pcs}</p><p><b>SIZE:</b> ${o.sz}</p>
+                <p><b>WORKER:</b> ${o.wrk}</p><p><b>DATE:</b> ${o.date}</p>
+            </div>
+            <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-top:15px;">
+                <b>INSTRUCTIONS:</b><br>${o.spc}
+            </div>
         `;
         document.getElementById('overlay').style.display = 'block';
     }
 
-    function moveStatus(no) {
-        database.ref('orders').orderByChild('orderNo').equalTo(no).once('value', s => {
-            const key = Object.keys(s.val())[0];
-            database.ref('orders/' + key).update({ status: 'CAM' }).then(() => alert("Moved to CAM"));
-        });
-    }
-
-    function doSearch() {
-        const q = document.getElementById('searchBox').value.toLowerCase();
-        const filtered = currentData.filter(o => o.orderNo.toLowerCase().includes(q));
-        const al = document.getElementById('allContainer');
+    function search() {
+        const q = document.getElementById('search').value.toLowerCase();
+        const filtered = masterData.filter(o => o.orderNo.toLowerCase().includes(q) || o.party.toLowerCase().includes(q));
+        const al = document.getElementById('allList');
         al.innerHTML = "";
         filtered.forEach(o => {
-             const firstImg = (o.photos && o.photos.length > 0) ? o.photos[0] : '';
-             al.innerHTML += `<div class="card" onclick="showFull('${o.orderNo}')" style="display:flex; align-items:center;">
-                <img src="${firstImg}" class="list-img">
-                <div style="flex:1"><b>${o.orderNo}</b><br><small>${o.party} | ${o.category}</small></div>
+            al.innerHTML += `<div class="card" onclick="viewDetails('${o.orderNo}')" style="display:flex; align-items:center;">
+                <img src="${o.img[0]}" class="list-img">
+                <div><b>${o.orderNo}</b> - ${o.party}<br><small>${o.cat} | ${o.wt}g</small></div>
             </div>`;
         });
     }
 
+    // Final Capture Fix[cite: 1]
     function downloadJPG(no) {
-        const o = currentData.find(x => x.orderNo === no);
+        const o = masterData.find(x => x.orderNo === no);
         if(!o) return;
 
-        // Fill Print Area exactly as saved
-        document.getElementById('out_no').innerText = o.orderNo;
-        document.getElementById('out_party').innerText = o.party;
-        document.getElementById('out_cat').innerText = o.category;
-        document.getElementById('out_pur').innerText = o.purity;
-        document.getElementById('out_wt').innerText = o.weight;
-        document.getElementById('out_pcs').innerText = o.pcs;
-        document.getElementById('out_sz').innerText = o.size;
-        document.getElementById('out_wrk').innerText = o.worker;
-        document.getElementById('out_spc').innerText = o.specs;
+        document.getElementById('p_no').innerText = o.orderNo;
+        document.getElementById('p_party').innerText = o.party;
+        document.getElementById('p_cat').innerText = o.cat;
+        document.getElementById('p_pur').innerText = o.pur;
+        document.getElementById('p_wt').innerText = o.wt;
+        document.getElementById('p_pcs').innerText = o.pcs;
+        document.getElementById('p_sz').innerText = o.sz;
+        document.getElementById('p_wrk').innerText = o.wrk;
+        document.getElementById('p_spc').innerText = o.spc;
         
-        document.getElementById('pImgs').innerHTML = o.photos.map(p => 
-            `<img src="${p}" style="width:90%; border:4px solid var(--red); margin-bottom:15px; border-radius:5px;">`
+        document.getElementById('pImgs').innerHTML = o.img.map(i => 
+            `<img src="${i}" style="width:30%; border:3px solid var(--red); height:220px; object-fit:cover; border-radius:10px;">`
         ).join('');
 
-        // Use slight delay to ensure images are rendered before capture
+        // Wait for images to load into the hidden canvas[cite: 1]
         setTimeout(() => {
-            html2canvas(document.getElementById("printArea"), { scale: 2, useCORS: true }).then(canvas => {
+            html2canvas(document.getElementById('printArea'), { 
+                scale: 2,
+                logging: false,
+                useCORS: true 
+            }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Shanti_Order_${o.orderNo}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
+                link.download = `SJ_Order_${o.orderNo}.jpg`;
+                link.href = canvas.toDataURL("image/jpeg", 0.95);
                 link.click();
             });
-        }, 500);
+        }, 800);
     }
 </script>
 </body>
