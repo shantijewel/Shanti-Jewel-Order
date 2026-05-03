@@ -10,42 +10,88 @@
     <style>
         :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); }
-        .logo-text { font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 0; }
-        .sub-header { font-size: 12px; letter-spacing: 4px; color: var(--gold); }
+        
+        /* Login Screen */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--brown); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .login-box { background: white; padding: 30px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; border-bottom: 5px solid var(--gold); }
+        .login-box h2 { color: var(--brown); margin-top: 0; }
+        .login-box input { border: 2px solid #ddd; text-align: center; letter-spacing: 5px; font-size: 24px; color: var(--brown); }
+
+        .header { background: var(--brown); color: white; text-align: center; padding: 10px; border-bottom: 3px solid var(--gold); }
+        .logo-text { font-size: 22px; font-weight: bold; letter-spacing: 2px; margin: 0; }
+        .sub-header { font-size: 10px; letter-spacing: 4px; color: var(--gold); }
+        .shree-text { font-size: 14px; color: var(--gold); margin-bottom: 2px; display: block; }
+        
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
         
-        /* 4-Slot Photo Grid */
+        /* Dashboard Styling */
+        .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .dash-item { background: var(--brown); color: white; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--gold); }
+        .dash-count { font-size: 20px; font-weight: bold; display: block; }
+        .dash-label { font-size: 9px; text-transform: uppercase; color: var(--gold); }
+
         .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .photo-box { border: 2px dashed var(--gold); height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; background: #fafafa; font-size: 12px; color: var(--brown); font-weight: bold; position: relative; }
+        .photo-box { border: 2px dashed var(--gold); height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; background: #fafafa; font-size: 12px; color: var(--brown); font-weight: bold; }
         .photo-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: white; }
+        input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .btn-gold { background: var(--gold); color: white; }
         .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; font-size: 12px; }
         
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 25px 2px; font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; line-height: 1.2; display: flex; align-items: center; justify-content: center; }
+        .tab { flex: 1; text-align: center; padding: 25px 2px; font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; }
         .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
 
-        /* Canvas (Hidden) */
-        #formCanvas { background: white; width: 600px; height: 850px; padding: 25px; position: fixed; left: -5000px; border: 15px solid var(--gold); box-sizing: border-box; }
-        .canvas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
-        .canvas-grid img { width: 100%; height: 220px; object-fit: cover; border-radius: 8px; }
+        /* DESIGNED ORDER FORM FOR DOWNLOAD */
+        #formCanvas { background: white; width: 600px; height: 850px; padding: 30px; position: fixed; left: -5000px; border: 12px solid var(--gold); box-sizing: border-box; }
+        .canvas-header { text-align: center; border-bottom: 4px solid var(--brown); padding-bottom: 20px; margin-bottom: 20px; }
+        .canvas-shree { font-size: 18px; color: #333; margin-bottom: 5px; }
+        .canvas-logo { font-size: 48px; font-weight: bold; color: var(--brown); letter-spacing: 5px; margin: 0; }
+        .canvas-sub { font-size: 16px; color: var(--gold); letter-spacing: 10px; font-weight: bold; }
+        .canvas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .canvas-grid img { width: 100%; height: 230px; object-fit: cover; border: 2px solid #eee; border-radius: 5px; }
+        .details-table { width: 100%; font-size: 22px; border-collapse: collapse; margin-top: 10px; }
+        .details-table td { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .notes-box { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-size: 20px; min-height: 100px; }
     </style>
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <span style="color:var(--gold); font-weight:bold; display:block; margin-bottom:10px;">IIश्रीII</span>
+        <h2>SHANTI JEWEL</h2>
+        <input type="password" id="passInput" placeholder="0000" maxlength="4">
+        <button class="btn btn-gold" style="margin-top:20px;" onclick="checkPass()">LOGIN</button>
+    </div>
+</div>
+
 <div class="header">
+    <span class="shree-text">IIश्रीII</span>
     <div class="logo-text">SHANTI JEWEL</div>
     <div class="sub-header">ORDER PORTAL</div>
 </div>
 
+<!-- DASHBOARD PAGE (WIPEOUT) -->
+<div id="dashPage" class="page active">
+    <h3 style="text-align:center; color:var(--brown);">PRODUCTION DASHBOARD</h3>
+    <div class="dash-grid" id="statsGrid">
+        <div class="dash-item"><span class="dash-count" id="count-CAD">0</span><span class="dash-label">CAD</span></div>
+        <div class="dash-item"><span class="dash-count" id="count-CAM">0</span><span class="dash-label">CAM</span></div>
+        <div class="dash-item"><span class="dash-count" id="count-CASTING">0</span><span class="dash-label">CASTING</span></div>
+        <div class="dash-item"><span class="dash-count" id="count-POLISH">0</span><span class="dash-label">POLISH</span></div>
+        <div class="dash-item"><span class="dash-count" id="count-HUID">0</span><span class="dash-label">HUID</span></div>
+        <div class="dash-item" style="background:green;"><span class="dash-count" id="count-READY">0</span><span class="dash-label">READY</span></div>
+    </div>
+    <div id="dashRecent"></div>
+</div>
+
 <!-- ADD ORDER PAGE -->
-<div id="addPage" class="page active">
+<div id="addPage" class="page">
     <div class="card">
         <div class="photo-grid">
             <div class="photo-box" id="p1" onclick="document.getElementById('f1').click()">+ PHOTO 1</div>
@@ -53,7 +99,6 @@
             <div class="photo-box" id="p3" onclick="document.getElementById('f3').click()">+ PHOTO 3</div>
             <div class="photo-box" id="p4" onclick="document.getElementById('f4').click()">+ PHOTO 4</div>
         </div>
-
         <input type="file" id="f1" accept="image/*" style="display:none" onchange="handleSingle(this, 'p1', 0)">
         <input type="file" id="f2" accept="image/*" style="display:none" onchange="handleSingle(this, 'p2', 1)">
         <input type="file" id="f3" accept="image/*" style="display:none" onchange="handleSingle(this, 'p3', 2)">
@@ -85,33 +130,41 @@
 </div>
 
 <div id="listPage" class="page"><div id="mainList"></div></div>
-<div id="infoPage" class="page"><div id="currentInfoList"></div></div>
 <div id="pastPage" class="page"><div id="pastList"></div></div>
 
-<!-- FORM CANVAS FOR DOWNLOAD -->
+<!-- FORM CANVAS -->
 <div id="formCanvas">
-    <div style="text-align:center; border-bottom:5px solid #5d4037; padding-bottom:15px; margin-bottom:15px;">
-        <div style="font-size: 50px; font-weight: bold; color: #5d4037;">SHANTI JEWEL</div>
+    <div class="canvas-header">
+        <div class="canvas-shree">IIश्रीII</div>
+        <div class="canvas-logo">SHANTI JEWEL</div>
+        <div class="canvas-sub">ORDER FORM</div>
     </div>
     <div id="c_imgs" class="canvas-grid"></div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:24px; border-top:2px solid #eee; padding-top:15px;">
-        <div><b>CAD:</b> <span id="c_cad"></span></div>
-        <div><b>WT:</b> <span id="c_wt"></span></div>
-        <div style="grid-column: span 2;"><b>SIZE:</b> <span id="c_sz"></span></div>
-    </div>
-    <div style="margin-top:20px; border:1px solid #ddd; padding:15px; border-radius:8px; background:#f9f9f9; font-size:22px;">
-        <b>NOTES:</b><br><span id="c_sp"></span>
-    </div>
+    <table class="details-table">
+        <tr><td><b>ORDER ID:</b> <span id="c_id"></span></td><td><b>PARTY:</b> <span id="c_pa"></span></td></tr>
+        <tr><td><b>CAD:</b> <span id="c_cad"></span></td><td><b>WT:</b> <span id="c_wt"></span></td></tr>
+        <tr><td colspan="2"><b>SIZE:</b> <span id="c_sz"></span></td></tr>
+    </table>
+    <div class="notes-box"><b>PRODUCTION NOTES:</b><br><span id="c_sp"></span></div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="nav('add', this)">PUNCH</div>
-    <div class="tab" onclick="nav('list', this)">PRODUCTION</div>
-    <div class="tab" onclick="nav('info', this)">CURRENT</div>
-    <div class="tab" onclick="nav('past', this)">PAST</div>
+    <div class="tab active" onclick="nav('dash', this)">DASHBOARD</div>
+    <div class="tab" onclick="nav('add', this)">PUNCH</div>
+    <div class="tab" onclick="nav('list', this)">WIP</div>
+    <div class="tab" onclick="nav('past', this)">HISTORY</div>
 </div>
 
 <script>
+    function checkPass() {
+        if(document.getElementById('passInput').value === '2215') {
+            document.getElementById('loginOverlay').style.display = 'none';
+            loadOrders();
+        } else {
+            alert("Incorrect Password");
+        }
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -131,12 +184,12 @@
             img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const max = 600;
+                const max = 800;
                 let w = img.width, h = img.height;
                 if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const optimized = canvas.toDataURL("image/jpeg", 0.5);
+                const optimized = canvas.toDataURL("image/jpeg", 0.6);
                 photoData[index] = optimized;
                 document.getElementById(previewId).innerHTML = `<img src="${optimized}">`;
             };
@@ -147,12 +200,11 @@
     function saveOrder() {
         const id = document.getElementById('i_id').value;
         const validPhotos = photoData.filter(p => p !== null);
-        if(!id || validPhotos.length === 0) return alert("Order ID and at least 1 Photo required");
-        
+        if(!id || validPhotos.length === 0) return alert("Order ID and Photos required");
         db.ref('orders/' + id).set({
             id: id, party: document.getElementById('i_pa').value || "-",
-            weight: document.getElementById('i_wt').value + "gms",
-            size: document.getElementById('i_sz').value + "NO.",
+            weight: (document.getElementById('i_wt').value || "0") + "gms",
+            size: (document.getElementById('i_sz').value || "-") + "NO.",
             dueDate: document.getElementById('i_dd').value || "9999-12-31",
             cadWorker: document.getElementById('i_cad').value || "-",
             specs: document.getElementById('i_sp').value || "None",
@@ -164,18 +216,24 @@
         document.querySelectorAll('.page, .tab').forEach(x => x.classList.remove('active'));
         document.getElementById(p + 'Page').classList.add('active');
         el.classList.add('active');
-        if(p !== 'add') loadOrders();
+        loadOrders();
     }
 
     function loadOrders() {
         db.ref('orders').on('value', s => {
             const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
-            const sList = document.getElementById('mainList'), cList = document.getElementById('currentInfoList'), pList = document.getElementById('pastList');
-            sList.innerHTML = ""; cList.innerHTML = ""; pList.innerHTML = "";
+            const sList = document.getElementById('mainList'), pList = document.getElementById('pastList');
+            sList.innerHTML = ""; pList.innerHTML = "";
             
+            depts.forEach(d => document.getElementById('count-' + d).innerText = "0");
+            const counts = {};
+
             data.forEach(o => {
                 const cur = o.status || "CAD";
-                const card = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> - ${o.party}</div></div><button class="btn btn-out" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT STAGE</button><button class="btn btn-out" style="color:green; border-color:green;" onclick="downloadForm('${o.id}')">DOWNLOAD FORM</button></div>`;
+                counts[cur] = (counts[cur] || 0) + 1;
+                document.getElementById('count-' + cur).innerText = counts[cur];
+
+                const card = `<div class="card"><div style="display:flex; gap:12px;"><img src="${o.imgs[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;"><div><b>${o.id}</b> | Stage: <span style="color:var(--gold)">${cur}</span><br><small>${o.party}</small></div></div><div style="display:flex; gap:5px;"><button class="btn btn-out" style="flex:1" onclick="moveNext('${o.id}', '${cur}')">MOVE NEXT</button><button class="btn btn-out" style="flex:1; color:green; border-color:green;" onclick="downloadForm('${o.id}')">FORM</button></div></div>`;
                 if(cur !== "READY") sList.innerHTML += card;
                 else pList.innerHTML += card;
             });
@@ -191,6 +249,8 @@
     function downloadForm(id) {
         const o = window.activeData.find(x => x.id === id);
         if(!o) return;
+        document.getElementById('c_id').innerText = o.id;
+        document.getElementById('c_pa').innerText = o.party;
         document.getElementById('c_cad').innerText = o.cadWorker;
         document.getElementById('c_wt').innerText = o.weight;
         document.getElementById('c_sz').innerText = o.size;
@@ -201,7 +261,7 @@
             html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
                 const img = canvas.toDataURL("image/jpeg", 0.9);
                 const w = window.open();
-                w.document.write(`<img src="${img}" style="width:100%;">`);
+                w.document.write(`<body style="margin:0;"><img src="${img}" style="width:100%;"><p style="text-align:center;">Long press to save form</p></body>`);
             });
         }, 500);
     }
