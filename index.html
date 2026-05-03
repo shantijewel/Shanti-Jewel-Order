@@ -3,141 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHANTI JEWEL - MASTER SYSTEM</title>
-    <!-- Firebase & Capture Scripts -->
+    <title>SHANTI JEWEL PORTAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <style>
-        :root { --gold: #D4AF37; --brown: #4e342e; --red: #d32f2f; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding-bottom: 80px; }
-        
-        /* UI Components */
-        .header { background: var(--brown); color: white; text-align: center; padding: 20px; border-bottom: 4px solid var(--gold); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        :root { --gold: #D4AF37; --brown: #4e342e; }
+        body { font-family: sans-serif; margin: 0; padding-bottom: 80px; background: #f4f4f4; }
+        .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); }
+        .page { display: none; padding: 10px; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .card { background: white; padding: 18px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        /* Form Styling */
-        input, select, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; background: #fff; }
-        .btn { padding: 16px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-gold { background: var(--gold); color: white; }
-        .btn-red { background: var(--red); color: white; }
-        .btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
-
-        /* Navigation Bar */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 13px; font-weight: bold; color: #aaa; cursor: pointer; }
-        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
-        
-        /* List Styling */
-        .list-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px; border: 1px solid #eee; }
-        
-        /* Overlay View */
-        #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; overflow-y:auto; padding:20px; }
-
-        /* PRINT CANVAS (A4 Portrait) */
-        #printArea { background: white; width: 794px; min-height: 1123px; padding: 45px; position: fixed; left: -9999px; border: 30px solid var(--red); color: var(--red); box-sizing: border-box; }
-        .p-row { display: flex; justify-content: space-between; font-size: 28px; font-weight: bold; margin-bottom: 18px; border-bottom: 2px solid #ffcccc; padding-bottom: 5px; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; }
+        .tab { flex: 1; text-align: center; line-height: 65px; font-weight: bold; color: #888; }
+        .tab.active { color: var(--brown); border-top: 3px solid var(--brown); }
+        .list-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px; }
+        #printArea { position: fixed; left: -9999px; width: 800px; padding: 40px; background: white; color: #d32f2f; border: 20px solid #d32f2f; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1 style="margin:0; font-size: 24px; letter-spacing: 1px;">SHANTI JEWEL</h1>
-    <span style="font-size: 10px; color: var(--gold); font-weight: bold;">ORDER MANAGEMENT SYSTEM</span>
-</div>
+<div class="header"><h2>SHANTI JEWEL</h2></div>
 
-<!-- 1. PUNCH PAGE -->
+<!-- PUNCH -->
 <div id="punchPage" class="page active">
     <div class="card">
-        <div style="border:2px dashed var(--gold); padding:30px; text-align:center; border-radius:12px; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
-            <b id="upTxt" style="color: var(--brown);">📸 CLICK TO ADD DESIGN PHOTOS</b>
-            <div id="prevBox" style="display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap: wrap;"></div>
-        </div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(event)">
+        <button class="btn btn-gold" onclick="document.getElementById('fileInput').click()">📸 ADD PHOTOS</button>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="compressAndHandle(event)">
+        <div id="prevBox" style="display:flex; gap:5px; margin-top:10px;"></div>
         
-        <input type="text" id="o_no" placeholder="Order Number (Required)">
+        <input type="text" id="o_no" placeholder="Order No">
         <input type="text" id="o_party" placeholder="Party Name">
-        
-        <select id="o_cat">
-            <option value="">Select Category</option>
-            <option>RING</option><option>EARRING</option><option>PENDANT</option>
-            <option>NECKLACE</option><option>BRACELET</option><option>KADA</option>
-        </select>
-
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="o_pur" placeholder="Purity (e.g. 22K)">
-            <input type="number" id="o_pcs" placeholder="Pcs">
-        </div>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="o_wt" placeholder="Weight (g)">
-            <input type="text" id="o_sz" placeholder="Size">
-        </div>
-        
-        <select id="o_wrk">
-            <option value="">Assign Worker</option>
-            <option>ALAUDIN</option><option>CHETAN SHINDE</option><option>DYE</option>
-        </select>
-        
-        <textarea id="o_spc" rows="3" placeholder="Special Manufacturing Instructions..."></textarea>
-        
-        <button class="btn btn-gold" onclick="saveOrder()">✅ PUNCH & SAVE ORDER</button>
+        <input type="text" id="o_wt" placeholder="Weight">
+        <textarea id="o_spc" placeholder="Instructions"></textarea>
+        <button class="btn btn-gold" style="background:green" onclick="save()">SAVE TO DATABASE</button>
     </div>
 </div>
 
-<!-- 2. WORKFLOW PAGE -->
-<div id="flowPage" class="page">
-    <h3 style="color: var(--brown); margin-left: 5px;">ACTIVE PRODUCTION</h3>
-    <div id="flowList"></div>
-</div>
-
-<!-- 3. ALL ORDERS PAGE -->
+<!-- VIEW -->
 <div id="allPage" class="page">
-    <input type="text" id="search" placeholder="🔍 Search Order Number or Party..." onkeyup="search()">
-    <div id="allList"></div>
-</div>
-
-<!-- FULL VIEW OVERLAY -->
-<div id="overlay">
-    <button class="btn btn-outline" style="width:auto; margin-bottom: 20px;" onclick="document.getElementById('overlay').style.display='none'">⬅ BACK TO LIST</button>
-    <div id="overContent"></div>
-</div>
-
-<!-- HIDDEN DOWNLOAD CANVAS -->
-<div id="printArea">
-    <div style="text-align:center; border-bottom:8px solid var(--red); padding-bottom:20px; margin-bottom:30px;">
-        <h1 style="font-size:85px; margin:0; font-family: serif;">SHANTI JEWEL</h1>
-        <p style="font-size:25px; letter-spacing:12px; margin: 10px 0;">PRODUCTION ORDER FORM</p>
-    </div>
-    <div id="pImgs" style="display:flex; justify-content:center; gap:15px; margin-bottom:40px;"></div>
-    
-    <div class="p-row"><span>ORDER NO:</span> <span id="p_no"></span></div>
-    <div class="p-row"><span>PARTY:</span> <span id="p_party"></span></div>
-    <div class="p-row"><span>CATEGORY:</span> <span id="p_cat"></span></div>
-    <div class="p-row"><span>PURITY:</span> <span id="p_pur"></span></div>
-    <div class="p-row"><span>TOTAL WEIGHT:</span> <span id="p_wt"></span></div>
-    <div class="p-row"><span>TOTAL PCS:</span> <span id="p_pcs"></span></div>
-    <div class="p-row"><span>SIZE:</span> <span id="p_sz"></span></div>
-    <div class="p-row"><span>ASSIGNED WORKER:</span> <span id="p_wrk"></span></div>
-    
-    <div style="border:5px solid var(--red); padding:25px; font-size:26px; margin-top:40px; min-height: 150px;">
-        <b style="text-decoration: underline;">SPECIAL SPECS:</b><br><br>
-        <span id="p_spc"></span>
-    </div>
+    <div id="orderList"></div>
 </div>
 
 <div class="tab-bar">
     <div class="tab active" onclick="nav('punchPage', this)">PUNCH</div>
-    <div class="tab" onclick="nav('flowPage', this)">WORKFLOW</div>
-    <div class="tab" onclick="nav('allPage', this)">ALL ORDERS</div>
+    <div class="tab" onclick="nav('allPage', this)">VIEW ALL</div>
+</div>
+
+<!-- HIDDEN FOR CAPTURE -->
+<div id="printArea">
+    <h1 style="text-align:center; font-size:50px;">SHANTI JEWEL</h1>
+    <div id="p_img" style="text-align:center; margin-bottom:20px;"></div>
+    <p style="font-size:30px;"><b>ORDER NO:</b> <span id="p_no"></span></p>
+    <p style="font-size:30px;"><b>PARTY:</b> <span id="p_party"></span></p>
+    <p style="font-size:30px;"><b>WEIGHT:</b> <span id="p_wt"></span></p>
+    <p style="font-size:24px; border:2px solid #d32f2f; padding:10px;"><b>SPECS:</b> <span id="p_spc"></span></p>
 </div>
 
 <script>
-    // Firebase Setup
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -146,175 +72,89 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    
-    let photos = [];
-    let masterData = [];
+    let photoData = [];
 
-    // Image Handling
-    function handleFiles(e) {
-        const files = Array.from(e.target.files).slice(0, 3);
-        photos = [];
+    // COMPRESS IMAGE QUALITY
+    function compressAndHandle(e) {
+        const files = Array.from(e.target.files);
+        photoData = [];
         document.getElementById('prevBox').innerHTML = "";
-        files.forEach(f => {
-            const r = new FileReader();
-            r.onload = (ev) => {
-                photos.push(ev.target.result);
-                document.getElementById('prevBox').innerHTML += `<img src="${ev.target.result}" style="width:70px; height:70px; object-fit:cover; border-radius:5px; border:2px solid var(--gold);">`;
-            };
-            r.readAsDataURL(f);
-        });
-    }
-
-    // Save Logic
-    function saveOrder() {
-        const no = document.getElementById('o_no').value;
-        if(!no || photos.length === 0) return alert("Order Number and at least 1 Photo are mandatory.");
         
-        const orderData = {
-            orderNo: no,
-            party: document.getElementById('o_party').value || "-",
-            cat: document.getElementById('o_cat').value || "-",
-            pur: document.getElementById('o_pur').value || "-",
-            pcs: document.getElementById('o_pcs').value || "0",
-            wt: document.getElementById('o_wt').value || "0.00",
-            sz: document.getElementById('o_sz').value || "-",
-            wrk: document.getElementById('o_wrk').value || "-",
-            spc: document.getElementById('o_spc').value || "None",
-            img: photos,
-            status: "CAD",
-            date: new Date().toLocaleDateString()
-        };
-
-        db.ref('orders/' + Date.now()).set(orderData).then(() => {
-            alert("Order Saved to Database!");
-            location.reload();
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const max = 600; // Compressed size
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > max) { h *= max / w; w = max; } }
+                    else { if (h > max) { w *= max / h; h = max; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.6); // 60% Quality
+                    photoData.push(compressed);
+                    document.getElementById('prevBox').innerHTML += `<img src="${compressed}" style="width:50px;height:50px;">`;
+                };
+            };
         });
     }
 
-    // Navigation
+    function save() {
+        const no = document.getElementById('o_no').value;
+        if(!no) return alert("Enter Order No");
+        db.ref('orders/' + Date.now()).set({
+            orderNo: no,
+            party: document.getElementById('o_party').value || "",
+            wt: document.getElementById('o_wt').value || "",
+            spc: document.getElementById('o_spc').value || "",
+            img: photoData
+        }).then(() => { alert("Saved!"); location.reload(); });
+    }
+
     function nav(id, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
-        if(id !== 'punchPage') loadData();
+        if(id === 'allPage') load();
     }
 
-    function loadData() {
+    function load() {
         db.ref('orders').on('value', s => {
-            const val = s.val() || {};
-            masterData = Object.values(val).reverse();
-            renderUI();
+            const list = document.getElementById('orderList');
+            list.innerHTML = "";
+            const data = Object.values(s.val() || {}).reverse();
+            data.forEach(o => {
+                list.innerHTML += `
+                <div class="card" style="display:flex; align-items:center;">
+                    <img src="${o.img ? o.img[0] : ''}" class="list-img">
+                    <div style="flex:1"><b>#${o.orderNo}</b><br>${o.party}</div>
+                    <button onclick="download('${o.orderNo}')" style="background:red; color:white; border:none; padding:10px; border-radius:4px;">JPG</button>
+                </div>`;
+            });
+            window.masterData = data;
         });
     }
 
-    // Rendering Logic - Fixed for "Undefined"
-    function renderUI() {
-        const fl = document.getElementById('flowList');
-        const al = document.getElementById('allList');
-        fl.innerHTML = ""; al.innerHTML = "";
-
-        masterData.forEach(o => {
-            const firstImg = (o.img && o.img.length > 0) ? o.img[0] : '';
-            
-            // Workflow List
-            fl.innerHTML += `<div class="card" style="display:flex; align-items:center;">
-                <img src="${firstImg}" class="list-img">
-                <div style="flex:1">
-                    <b style="font-size:18px;">#${o.orderNo}</b><br>
-                    <small>STATUS: <span style="color:var(--red); font-weight:bold;">${o.status}</span></small>
-                    <div style="display:flex; gap:8px; margin-top:8px;">
-                        <button class="btn btn-red" style="padding:10px; font-size:11px;" onclick="downloadJPG('${o.orderNo}')">DOWNLOAD FORM</button>
-                        <button class="btn btn-outline" style="padding:10px; font-size:11px; color:black; border-color:#ccc;" onclick="updateStatus('${o.orderNo}')">MOVE TO CAM</button>
-                    </div>
-                </div>
-            </div>`;
-
-            // All Orders List
-            al.innerHTML += `<div class="card" onclick="viewDetails('${o.orderNo}')" style="display:flex; align-items:center;">
-                <img src="${firstImg}" class="list-img">
-                <div style="flex:1">
-                    <b>${o.orderNo}</b> - ${o.party}<br>
-                    <small>${o.cat} | ${o.wt}g | ${o.date}</small>
-                </div>
-                <div style="color:var(--gold);">▶</div>
-            </div>`;
-        });
-    }
-
-    function updateStatus(no) {
-        db.ref('orders').orderByChild('orderNo').equalTo(no).once('value', s => {
-            const key = Object.keys(s.val())[0];
-            db.ref('orders/' + key).update({ status: 'CAM' }).then(() => alert("Status Updated to CAM"));
-        });
-    }
-
-    function viewDetails(no) {
-        const o = masterData.find(x => x.orderNo === no);
-        const content = document.getElementById('overContent');
-        content.innerHTML = `
-            <div style="display:flex; gap:10px; overflow-x:auto; margin-bottom:20px;">
-                ${o.img.map(i => `<img src="${i}" style="height:300px; border-radius:10px;">`).join('')}
-            </div>
-            <h2 style="color:var(--brown); border-bottom:2px solid var(--gold);">ORDER #${o.orderNo}</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:16px;">
-                <p><b>PARTY:</b> ${o.party}</p><p><b>CATEGORY:</b> ${o.cat}</p>
-                <p><b>WEIGHT:</b> ${o.wt}g</p><p><b>PURITY:</b> ${o.pur}</p>
-                <p><b>PCS:</b> ${o.pcs}</p><p><b>SIZE:</b> ${o.sz}</p>
-                <p><b>WORKER:</b> ${o.wrk}</p><p><b>DATE:</b> ${o.date}</p>
-            </div>
-            <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-top:15px;">
-                <b>INSTRUCTIONS:</b><br>${o.spc}
-            </div>
-        `;
-        document.getElementById('overlay').style.display = 'block';
-    }
-
-    function search() {
-        const q = document.getElementById('search').value.toLowerCase();
-        const filtered = masterData.filter(o => o.orderNo.toLowerCase().includes(q) || o.party.toLowerCase().includes(q));
-        const al = document.getElementById('allList');
-        al.innerHTML = "";
-        filtered.forEach(o => {
-            al.innerHTML += `<div class="card" onclick="viewDetails('${o.orderNo}')" style="display:flex; align-items:center;">
-                <img src="${o.img[0]}" class="list-img">
-                <div><b>${o.orderNo}</b> - ${o.party}<br><small>${o.cat} | ${o.wt}g</small></div>
-            </div>`;
-        });
-    }
-
-    // Final Capture Fix[cite: 1]
-    function downloadJPG(no) {
-        const o = masterData.find(x => x.orderNo === no);
-        if(!o) return;
-
+    function download(no) {
+        const o = window.masterData.find(x => x.orderNo === no);
         document.getElementById('p_no').innerText = o.orderNo;
         document.getElementById('p_party').innerText = o.party;
-        document.getElementById('p_cat').innerText = o.cat;
-        document.getElementById('p_pur').innerText = o.pur;
         document.getElementById('p_wt').innerText = o.wt;
-        document.getElementById('p_pcs').innerText = o.pcs;
-        document.getElementById('p_sz').innerText = o.sz;
-        document.getElementById('p_wrk').innerText = o.wrk;
         document.getElementById('p_spc').innerText = o.spc;
+        document.getElementById('p_img').innerHTML = o.img.map(i => `<img src="${i}" style="width:100%; max-height:400px; object-fit:contain; margin-bottom:10px;">`).join('');
         
-        document.getElementById('pImgs').innerHTML = o.img.map(i => 
-            `<img src="${i}" style="width:30%; border:3px solid var(--red); height:220px; object-fit:cover; border-radius:10px;">`
-        ).join('');
-
-        // Wait for images to load into the hidden canvas[cite: 1]
         setTimeout(() => {
-            html2canvas(document.getElementById('printArea'), { 
-                scale: 2,
-                logging: false,
-                useCORS: true 
-            }).then(canvas => {
+            html2canvas(document.getElementById('printArea')).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `SJ_Order_${o.orderNo}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.95);
+                link.download = `${o.orderNo}.jpg`;
+                link.href = canvas.toDataURL("image/jpeg", 0.8);
                 link.click();
             });
-        }, 800);
+        }, 500);
     }
 </script>
 </body>
