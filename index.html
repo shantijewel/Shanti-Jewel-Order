@@ -25,6 +25,7 @@
         .page.active { display: block; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
         
+        /* Dashboard Lock Styles */
         .wipeout-lock { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; margin-top: 20px; border: 1px solid #ddd; }
         .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .dash-item { background: var(--brown); color: white; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--gold); }
@@ -136,7 +137,7 @@
     <div id="wipeoutLock" class="wipeout-lock">
         <h2 style="color:var(--brown); margin-top:0;">ADMIN ACCESS</h2>
         <p style="font-size:12px; color:#666;">Enter password to view Wipeout Analytics</p>
-        <input type="password" id="wipeoutPass" placeholder="••••" maxlength="4" style="width:100px; letter-spacing:4px;">
+        <input type="password" id="wipeoutPass" placeholder="••••" maxlength="4" style="width:100px; letter-spacing:4px; text-align:center;">
         <button class="btn btn-gold" style="margin-top:15px; width:150px;" onclick="unlockWipeout()">UNLOCK</button>
     </div>
 
@@ -160,11 +161,10 @@
             <thead><tr><th>Party</th><th>Pending</th><th>Recd (30D)</th></tr></thead>
             <tbody id="partyStatsBody"></tbody>
         </table>
-        <button class="btn btn-out" onclick="location.reload()">LOCK DASHBOARD</button>
+        <button class="btn btn-out" onclick="lockDashboard()">EXIT & LOCK</button>
     </div>
 </div>
 
-<!-- FORM CANVAS -->
 <div id="formCanvas">
     <div class="canvas-header"><div class="canvas-logo">SHANTI JEWEL</div></div>
     <div id="c_imgs" class="canvas-grid"></div>
@@ -181,7 +181,23 @@
 
 <script>
     function checkPass() { if(document.getElementById('passInput').value === '1008') { document.getElementById('loginOverlay').style.display = 'none'; loadOrders(); } else { alert("Incorrect"); } }
-    function unlockWipeout() { if(document.getElementById('wipeoutPass').value === '2215') { document.getElementById('wipeoutLock').style.display = 'none'; document.getElementById('wipeoutContent').style.display = 'block'; } else { alert("Wrong Password"); } }
+    
+    // Dashboard Unlock/Lock Logic
+    function unlockWipeout() { 
+        if(document.getElementById('wipeoutPass').value === '2215') { 
+            document.getElementById('wipeoutLock').style.display = 'none'; 
+            document.getElementById('wipeoutContent').style.display = 'block'; 
+        } else { 
+            alert("Wrong Password"); 
+            document.getElementById('wipeoutPass').value = "";
+        } 
+    }
+    
+    function lockDashboard() {
+        document.getElementById('wipeoutLock').style.display = 'block'; 
+        document.getElementById('wipeoutContent').style.display = 'none';
+        document.getElementById('wipeoutPass').value = "";
+    }
 
     const firebaseConfig = { apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU", authDomain: "shanti-jewel-order.firebaseapp.com", projectId: "shanti-jewel-order", databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
@@ -224,6 +240,8 @@
         document.querySelectorAll('.page, .tab').forEach(x => x.classList.remove('active'));
         document.getElementById(p + 'Page').classList.add('active');
         el.classList.add('active');
+        // Re-lock dashboard if moving away from it
+        if(p !== 'dash') lockDashboard();
     }
 
     function loadOrders() {
@@ -238,16 +256,21 @@
     function calcDash(data) {
         const monthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
         let hand = 0; let done = 0; let pC = {};
-        depts.forEach(d => document.getElementById('count-' + d).innerText = "0");
+        depts.forEach(d => {
+            const el = document.getElementById('count-' + d);
+            if(el) el.innerText = "0";
+        });
 
         data.forEach(o => {
             const s = o.status || "CAD"; const wt = parseFloat(o.weight) || 0; const p = o.party || "-";
             if(!pC[p]) pC[p] = { pending: 0, rec30: 0 };
             if(s !== "READY") { 
                 hand += wt; pC[p].pending++; 
-                document.getElementById('count-' + s).innerText = (parseInt(document.getElementById('count-' + s).innerText) + 1);
+                let countEl = document.getElementById('count-' + s);
+                if(countEl) countEl.innerText = (parseInt(countEl.innerText) + 1);
             } else {
-                document.getElementById('count-READY').innerText = (parseInt(document.getElementById('count-READY').innerText) + 1);
+                let readyEl = document.getElementById('count-READY');
+                if(readyEl) readyEl.innerText = (parseInt(readyEl.innerText) + 1);
                 if(o.ts >= monthAgo) done += wt;
             }
             if(o.ts >= monthAgo) pC[p].rec30++;
