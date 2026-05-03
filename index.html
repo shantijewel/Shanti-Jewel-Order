@@ -6,203 +6,278 @@
     <title>Shanti Jewel ERP</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
-        .header { background: var(--brown); color: white; text-align: center; padding: 18px; font-weight: bold; border-bottom: 3px solid var(--gold); }
+        :root { --gold: #D4AF37; --brown: #8B735B; --bg: #f4f7f6; --green: #2ecc71; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
+        
+        .header { background: var(--brown); color: white; text-align: center; padding: 15px; position: sticky; top: 0; z-index: 100; }
+        .dept-scroll { display: flex; overflow-x: auto; background: white; padding: 10px; gap: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 50px; z-index: 99; }
+        .dept-pill { padding: 8px 15px; border-radius: 20px; background: #eee; white-space: nowrap; font-size: 13px; font-weight: bold; color: #666; }
+        .dept-pill.active { background: var(--gold); color: white; }
+
+        /* Progress Tracker Styles */
+        .stepper { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .step { text-align: center; flex: 1; font-size: 10px; color: #ccc; position: relative; }
+        .step.done { color: var(--green); }
+        .step.active { color: var(--gold); font-weight: bold; }
+        .step-icon { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; background: white; }
+        .step.done .step-icon { background: var(--green); border-color: var(--green); color: white; }
+        .step.active .step-icon { border-color: var(--gold); color: var(--gold); }
+
+        /* Multi-Image Styles */
+        .img-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px; }
+        .preview-box { width: 100%; aspect-ratio: 1; background: #eee; border-radius: 8px; overflow: hidden; border: 1px solid #ddd; position: relative;}
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; }
+
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        input, textarea, select { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         
-        /* Workflow Styling */
-        .arrow-container { display: flex; gap: 5px; margin-top: 12px; overflow-x: auto; padding-bottom: 5px; }
-        .step { background: #e0e0e0; padding: 6px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; color: #777; }
-        .step.active { background: var(--gold); color: white; }
+        .order-item { background: white; border-radius: 12px; padding: 10px; margin-bottom: 10px; display: flex; gap: 12px; border-left: 5px solid var(--gold); position: relative; }
+        .order-item img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; }
+        .due-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; color: #e74c3c; font-weight: bold; }
 
-        /* Form Canvas - Optimized for WhatsApp/Mobile */
-        #cadCanvas { background: white; width: 500px; padding: 30px; position: fixed; left: -5000px; border: 10px solid var(--gold); color: #333; }
-        .cad-imgs { text-align: center; margin: 15px 0; }
-        .cad-imgs img { width: 90%; height: auto; border-radius: 10px; border: 2px solid #eee; margin-bottom: 10px; }
-
-        /* UI Buttons */
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
-        .btn-gold { background: var(--gold); color: white; }
-        .btn-outline { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; }
-
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; z-index: 1000; }
-        .tab { flex: 1; text-align: center; padding: 20px 5px; font-size: 12px; color: #999; font-weight: bold; }
-        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; }
+        .modal-content { background: white; margin: 2% auto; width: 92%; border-radius: 15px; padding: 15px; max-height: 90vh; overflow-y: auto; }
+        
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 60px; }
+        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #888; }
+        .tab.active { color: var(--gold); }
+        
+        .share-btn { background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; width: 100%; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="header">SHANTI JEWEL</div>
 
-<!-- TAB 1: PUNCH -->
+<div id="deptMenu" class="dept-scroll" style="display:none;">
+    <div class="dept-pill active" onclick="filterDept('CAD', this)">CAD</div>
+    <div class="dept-pill" onclick="filterDept('CAM', this)">CAM</div>
+    <div class="dept-pill" onclick="filterDept('Casting', this)">Casting</div>
+    <div class="dept-pill" onclick="filterDept('Polishing', this)">Polishing</div>
+    <div class="dept-pill" onclick="filterDept('HUID', this)">HUID</div>
+    <div class="dept-pill" onclick="filterDept('Ready', this)">Ready</div>
+</div>
+
+<!-- PAGE: ADD ORDER -->
 <div id="addPage" class="page active">
     <div class="card">
-        <div id="uploadArea" style="border:2px dashed var(--gold); padding:20px; text-align:center; border-radius:10px;" onclick="document.getElementById('fileInput').click()">
-            <span id="upMsg">📸 TAP TO ADD PHOTOS</span>
-            <div id="previews" style="display:flex; gap:5px; justify-content:center; margin-top:10px;"></div>
+        <label>Upload 1-3 Images (Precision Focus)</label>
+        <div class="img-grid">
+            <div class="preview-box" onclick="document.getElementById('cam').click()"><img id="p1"><div style="position:absolute; top:35%; left:25%; font-size:10px;" id="t1">+ Image 1</div></div>
+            <div class="preview-box" onclick="document.getElementById('cam').click()"><img id="p2"><div style="position:absolute; top:35%; left:25%; font-size:10px;" id="t2">+ Image 2</div></div>
+            <div class="preview-box" onclick="document.getElementById('cam').click()"><img id="p3"><div style="position:absolute; top:35%; left:25%; font-size:10px;" id="t3">+ Image 3</div></div>
         </div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="compressImages(event)">
+        <input type="file" id="cam" accept="image/*" multiple style="display:none" onchange="handleImages(event)">
         
-        <input type="text" id="orderId" placeholder="Order No (e.g. 101)">
+        <input type="text" id="orderId" placeholder="Order / Bill Number">
         <input type="text" id="party" placeholder="Party Name">
-        <input type="text" id="weight" placeholder="Weight (g)">
-        <input type="text" id="size" placeholder="Size">
-        <textarea id="specs" placeholder="Instructions"></textarea>
-        <button class="btn btn-gold" onclick="saveOrder()">PUNCH ORDER</button>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="weight" placeholder="Approx Wt">
+            <input type="date" id="dueDate">
+        </div>
+        <textarea id="specs" rows="2" placeholder="Metal, Purity, Diamond details..."></textarea>
+        <button class="save-btn" onclick="saveOrder()" style="background:var(--gold); color:white; padding:15px; border-radius:10px; width:100%; border:none; margin-top:10px;">PUNCH ORDER</button>
     </div>
 </div>
 
-<!-- TAB 2: WORKFLOW -->
-<div id="statusPage" class="page"><div id="statusList"></div></div>
+<!-- PAGE: WORKFLOW -->
+<div id="listPage" class="page">
+    <input type="text" id="search" placeholder="🔍 Search Order..." onkeyup="renderOrders()">
+    <div id="orderList"></div>
+</div>
 
-<!-- TAB 3: ALL ORDERS -->
-<div id="infoPage" class="page"><div id="fullInfoList"></div></div>
-
-<!-- ORDER FORM CANVAS (Optimized Size) -->
-<div id="cadCanvas">
-    <div style="text-align:center; border-bottom:4px solid var(--brown); padding-bottom:10px;">
-        <h2 style="margin:0; font-size:40px;">SHANTI JEWEL</h2>
-        <p style="letter-spacing:5px; margin:5px 0;">PRODUCTION FORM</p>
-    </div>
-    <div id="cadImgContainer" class="cad-imgs"></div>
-    <div style="font-size:24px; line-height:1.8;">
-        <b>Order ID:</b> #<span id="cId"></span><br>
-        <b>Party:</b> <span id="cParty"></span><br>
-        <b>Weight:</b> <span id="cWt"></span>g | <b>Size:</b> <span id="cSz"></span><br>
-        <div style="margin-top:10px; border-top:1px solid #ddd; padding-top:10px;">
-            <b>Instructions:</b><br>
-            <div id="cSpecs" style="background:#f4f4f4; padding:15px; border-radius:8px;"></div>
+<!-- ORDER MODAL -->
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <div id="stepperContainer" class="stepper"></div>
+        <div id="modalImgs" class="img-grid" style="grid-template-columns: 1fr; height: 250px;">
+            <!-- Big image carousel or toggle will go here -->
+            <img id="mImgMain" style="width:100%; height:250px; object-fit:contain; border-radius:10px;">
         </div>
+        <div id="imgThumbs" class="img-grid" style="margin-top:10px;"></div>
+        
+        <h2 id="mTitle" style="margin:10px 0 5px 0;"></h2>
+        <p id="mDetails" style="margin:0; color:#666;"></p>
+        <div id="mSpecs" style="background:#f0f0f0; padding:10px; border-radius:8px; margin:10px 0; font-size:14px;"></div>
+        
+        <button id="nextBtn" style="background:var(--green); color:white; border:none; padding:15px; border-radius:10px; width:100%; font-weight:bold;">MOVE NEXT ➔</button>
+        <button class="share-btn" onclick="shareOrder()">SHARE ORDER FORM (WhatsApp)</button>
+        <button onclick="closeModal()" style="background:#eee; border:none; padding:10px; width:100%; margin-top:10px; border-radius:8px;">Back</button>
     </div>
 </div>
 
 <div class="tab-bar">
-    <div class="tab active" onclick="nav('add', this)">PUNCH</div>
-    <div class="tab" onclick="nav('status', this)">WORKFLOW</div>
-    <div class="tab" onclick="nav('info', this)">ALL</div>
+    <div class="tab active" onclick="switchMainTab('add', this)"><span>✚</span>NEW</div>
+    <div class="tab" onclick="switchMainTab('list', this)"><span>⚙️</span>WORKFLOW</div>
 </div>
 
 <script>
+    // --- FIREBASE CONFIG (Use your actual config here) ---
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
         projectId: "shanti-jewel-order",
+        storageBucket: "shanti-jewel-order.firebasestorage.app",
+        messagingSenderId: "382209058715",
+        appId: "1:382209058715:web:44566a9efb13c452ad633e",
         databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const deptFlow = ["CAD", "CAM", "CASTING", "POLISHING", "HUID", "READY"];
-    let currentPhotos = [];
+    
+    let uploadedImages = [];
+    let currentDept = "CAD";
+    const stages = ["CAD", "CAM", "Casting", "Polishing", "HUID", "Ready"];
 
-    function compressImages(e) {
-        const files = Array.from(e.target.files).slice(0, 3);
-        currentPhotos = [];
-        document.getElementById('previews').innerHTML = "";
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = ev => {
-                const img = new Image();
-                img.src = ev.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 600; canvas.height = (img.height / img.width) * 600;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const compressed = canvas.toDataURL("image/jpeg", 0.7);
-                    currentPhotos.push(compressed);
-                    document.getElementById('previews').innerHTML += `<img src="${compressed}" style="width:40px;height:40px;border-radius:4px;">`;
-                };
-            };
-        });
+    function switchMainTab(page, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(page + 'Page').classList.add('active');
+        document.getElementById('deptMenu').style.display = (page === 'list') ? 'flex' : 'none';
+        if(page === 'list') renderOrders();
     }
 
-    function nav(p, el) {
-        document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        document.getElementById(p + 'Page').classList.add('active');
+    function filterDept(dept, el) {
+        currentDept = dept;
+        document.querySelectorAll('.dept-pill').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
-        if(p !== 'add') loadData();
+        renderOrders();
+    }
+
+    async function handleImages(e) {
+        const files = Array.from(e.target.files).slice(0, 3);
+        uploadedImages = [];
+        for (let i = 0; i < files.length; i++) {
+            const data = await compressImage(files[i]);
+            uploadedImages.push(data);
+            document.getElementById(`p${i+1}`).src = data;
+            document.getElementById(`t${i+1}`).style.display = 'none';
+        }
+    }
+
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (f) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scale = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = f.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     function saveOrder() {
         const id = document.getElementById('orderId').value;
-        if(!id || currentPhotos.length === 0) return alert("Missing Order No or Photo");
-        db.ref('orders/' + id).set({
-            id: id,
-            party: document.getElementById('party').value || "-",
-            weight: document.getElementById('weight').value || "0",
-            size: document.getElementById('size').value || "-",
-            specs: document.getElementById('specs').value || "None",
-            imgs: currentPhotos,
+        const party = document.getElementById('party').value;
+        const dueDate = document.getElementById('dueDate').value;
+        if(!id || !party || !dueDate) return alert("Fill ID, Party, and Delivery Date");
+
+        const order = {
+            id, party, dueDate, 
+            weight: document.getElementById('weight').value,
+            specs: document.getElementById('specs').value,
+            photos: uploadedImages,
             status: "CAD",
-            time: Date.now()
-        }).then(() => location.reload());
+            ts: Date.now()
+        };
+
+        db.ref('orders/' + id).set(order).then(() => {
+            alert("Order Punched Successfully!");
+            location.reload();
+        });
     }
 
-    function loadData() {
-        db.ref('orders').on('value', snap => {
-            const data = snap.val() || {};
-            const sList = document.getElementById('statusList');
-            const iList = document.getElementById('fullInfoList');
-            sList.innerHTML = ""; iList.innerHTML = "";
+    function renderOrders() {
+        db.ref('orders').on('value', (snap) => {
+            const list = document.getElementById('orderList');
+            list.innerHTML = "";
+            let orders = Object.values(snap.val() || {});
             
-            Object.values(data).sort((a,b) => b.time - a.time).forEach(o => {
-                const img = (o.imgs && o.imgs[0]) ? o.imgs[0] : "";
-                const id = o.id || "Error";
-                const status = o.status || "CAD";
+            // SORT BY DUE DATE (Earliest first)
+            orders.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
-                // Workflow List
-                let steps = deptFlow.map(s => `<div class="step ${status === s ? 'active' : ''}">${s}</div>`).join('');
-                sList.innerHTML += `
-                <div class="card">
-                    <div style="display:flex; gap:10px;">
-                        <img src="${img}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
-                        <div><b>#${id}</b> - ${o.party}<br><small>Dept: ${status}</small></div>
-                    </div>
-                    <div class="arrow-container">${steps}</div>
-                    <button class="btn btn-outline" onclick="moveNext('${id}', '${status}')">MOVE TO NEXT</button>
-                    <button class="btn btn-outline" style="color:green; border-color:green;" onclick="downloadForm('${id}')">DOWNLOAD FORM</button>
-                </div>`;
-
-                // All Info
-                iList.innerHTML += `<div class="card"><b>#${id}</b> | ${o.party}<br>${o.weight}g | ${o.size}</div>`;
+            orders.forEach(o => {
+                if(o.status === currentDept) {
+                    const div = document.createElement('div');
+                    div.className = 'order-item';
+                    div.onclick = () => openModal(o);
+                    div.innerHTML = `
+                        <img src="${o.photos[0]}">
+                        <div>
+                            <h4 style="margin:0">#${o.id} - ${o.party}</h4>
+                            <p style="font-size:12px; margin:5px 0;">Wt: ${o.weight}</p>
+                        </div>
+                        <div class="due-tag">Due: ${o.dueDate}</div>
+                    `;
+                    list.appendChild(div);
+                }
             });
         });
     }
 
-    function moveNext(id, current) {
-        const idx = deptFlow.indexOf(current);
-        if(idx < deptFlow.length - 1) {
-            db.ref('orders/' + id).update({ status: deptFlow[idx + 1] });
-        } else { alert("Order is Finished!"); }
+    function openModal(o) {
+        window.currentOrder = o;
+        document.getElementById('mTitle').innerText = "#" + o.id + " | " + o.party;
+        document.getElementById('mDetails').innerText = `Due Date: ${o.dueDate} | Weight: ${o.weight}`;
+        document.getElementById('mSpecs').innerText = "Notes: " + (o.specs || "No extra specs");
+        
+        // Render Stepper (Tick Marks)
+        const stepper = document.getElementById('stepperContainer');
+        stepper.innerHTML = "";
+        const currentIndex = stages.indexOf(o.status);
+        stages.forEach((s, i) => {
+            const step = document.createElement('div');
+            step.className = `step ${i < currentIndex ? 'done' : (i === currentIndex ? 'active' : '')}`;
+            step.innerHTML = `<div class="step-icon">${i < currentIndex ? '✓' : i+1}</div>${s}`;
+            stepper.appendChild(step);
+        });
+
+        // Photos
+        document.getElementById('mImgMain').src = o.photos[0];
+        const thumbs = document.getElementById('imgThumbs');
+        thumbs.innerHTML = "";
+        o.photos.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.style = "width:100%; aspect-ratio:1; object-fit:cover; border-radius:5px; border:2px solid #ddd;";
+            img.onclick = () => document.getElementById('mImgMain').src = src;
+            thumbs.appendChild(img);
+        });
+
+        const nextBtn = document.getElementById('nextBtn');
+        if(currentIndex < stages.length - 1) {
+            nextBtn.style.display = "block";
+            nextBtn.innerText = "MOVE TO " + stages[currentIndex + 1] + " ➔";
+            nextBtn.onclick = () => {
+                db.ref('orders/' + o.id).update({ status: stages[currentIndex + 1] });
+                closeModal();
+            };
+        } else { nextBtn.style.display = "none"; }
+
+        document.getElementById('orderModal').style.display = "block";
     }
 
-    function downloadForm(id) {
-        db.ref('orders/' + id).once('value', snap => {
-            const o = snap.val();
-            document.getElementById('cId').innerText = o.id;
-            document.getElementById('cParty').innerText = o.party;
-            document.getElementById('cWt').innerText = o.weight;
-            document.getElementById('cSz').innerText = o.size;
-            document.getElementById('cSpecs').innerText = o.specs;
-            document.getElementById('cadImgContainer').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
-            
-            setTimeout(() => {
-                html2canvas(document.querySelector("#cadCanvas")).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `SJ_${o.id}.jpg`;
-                    link.href = canvas.toDataURL("image/jpeg", 0.8);
-                    link.click();
-                });
-            }, 500);
-        });
+    function shareOrder() {
+        const o = window.currentOrder;
+        const msg = `*SHANTI JEWEL - ORDER FORM*%0A--------------------------%0A*Order No:* ${o.id}%0A*Party:* ${o.party}%0A*Due Date:* ${o.dueDate}%0A*Specs:* ${o.specs}%0A--------------------------%0APlease acknowledge.`;
+        window.open(`https://wa.me/?text=${msg}`, '_blank');
     }
+
+    function closeModal() { document.getElementById('orderModal').style.display = "none"; }
 </script>
 </body>
 </html>
