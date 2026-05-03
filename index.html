@@ -178,11 +178,7 @@
     function unlockWipeout() { if(document.getElementById('wipeoutPass').value === '2215') { document.getElementById('wipeoutLock').style.display = 'none'; document.getElementById('wipeoutContent').style.display = 'block'; } else { alert("Wrong Password"); } }
     function lockDashboard() { document.getElementById('wipeoutLock').style.display = 'block'; document.getElementById('wipeoutContent').style.display = 'none'; document.getElementById('wipeoutPass').value = ""; }
     
-    function wipeAllData() {
-        if(confirm("DANGER: Wipe all data?")) {
-            db.ref('orders').remove().then(() => { location.reload(); });
-        }
-    }
+    function wipeAllData() { if(confirm("DANGER: Wipe all data?")) { db.ref('orders').remove().then(() => { location.reload(); }); } }
 
     const firebaseConfig = { apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU", authDomain: "shanti-jewel-order.firebaseapp.com", projectId: "shanti-jewel-order", databaseURL: "https://shanti-jewel-order-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
@@ -208,14 +204,21 @@
         reader.readAsDataURL(input.files[0]);
     }
 
+    // UPDATED SAVE LOGIC - FORCES FORMATTING TO DATABASE
     function saveOrder() {
         const id = document.getElementById('i_id').value;
+        const weightInput = document.getElementById('i_wt').value;
+        const sizeInput = document.getElementById('i_sz').value;
         const valid = photoData.filter(p => p !== null);
+        
         if(!id || valid.length === 0) return alert("ID & Photos Required");
+
+        const finalWeight = weightInput ? parseFloat(weightInput).toFixed(3) : "0.000";
+        const finalSize = sizeInput ? sizeInput + " NO." : "-";
+
         db.ref('orders/' + id).set({
             id: id, party: document.getElementById('i_pa').value || "-",
-            weight: parseFloat(document.getElementById('i_wt').value) || 0,
-            size: document.getElementById('i_sz').value || "-",
+            weight: finalWeight, size: finalSize,
             status: "CAD", ts: Date.now(), imgs: valid, 
             cadWorker: document.getElementById('i_cad').value || "-",
             specs: document.getElementById('i_sp').value || "-"
@@ -272,18 +275,17 @@
 
     function moveNext(id, cur) { const idx = depts.indexOf(cur); if(idx < depts.length - 1) db.ref('orders/' + id).update({ status: depts[idx + 1], ts: Date.now() }); }
     
-    // CRITICAL: UPDATED DOWNLOAD FORM WITH .000 AND NO.
+    // UPDATED DOWNLOAD FORM - FORCES FORMATTING TO IMAGE
     function downloadForm(id) {
         const o = window.fullData.find(x => x.id === id);
         document.getElementById('c_id').innerText = o.id;
         document.getElementById('c_pa').innerText = o.party;
         
-        // FORMAT WEIGHT TO .000
-        const formattedWt = parseFloat(o.weight).toFixed(3);
-        document.getElementById('c_wt').innerText = formattedWt + " gms";
+        const displayWt = parseFloat(o.weight).toFixed(3);
+        document.getElementById('c_wt').innerText = displayWt + " gms";
         
-        // FORMAT SIZE WITH NO.
-        document.getElementById('c_sz').innerText = o.size ? o.size + " NO." : "-";
+        const displaySize = o.size.includes("NO.") ? o.size : o.size + " NO.";
+        document.getElementById('c_sz').innerText = displaySize;
         
         document.getElementById('c_cad').innerText = o.cadWorker || "-";
         document.getElementById('c_sp').innerText = o.specs || "-";
