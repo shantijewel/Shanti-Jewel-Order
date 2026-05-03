@@ -9,60 +9,80 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --gold: #D4AF37; --brown: #5d4037; --bg: #f4f7f6; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
-        .header { background: var(--brown); color: white; text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: #333; }
+        .header { background: var(--brown); color: white; text-align: center; padding: 18px; font-weight: bold; font-size: 20px; border-bottom: 3px solid var(--gold); }
         .page { display: none; padding: 15px; }
         .page.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #ddd; }
-        .flow-box { display: flex; gap: 4px; margin: 10px 0; }
-        .s { background: #eee; padding: 5px; border-radius: 4px; font-size: 9px; font-weight: bold; flex: 1; text-align: center; color: #777; }
-        .s.active { background: var(--gold); color: white; }
-        #formCanvas { background: white; width: 450px; padding: 25px; position: fixed; left: -5000px; border: 10px solid var(--gold); }
-        input, textarea { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        
+        /* Jewelry Workflow */
+        .flow-container { display: flex; gap: 4px; margin: 12px 0; overflow-x: auto; padding-bottom: 5px; }
+        .step { background: #e0e0e0; padding: 6px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; color: #777; flex: 1; text-align: center; }
+        .step.active { background: var(--gold); color: white; }
+
+        /* Production Form Layout */
+        #formCanvas { background: white; width: 500px; padding: 35px; position: fixed; left: -5000px; border: 12px solid var(--gold); }
+        .form-imgs { text-align: center; margin: 20px 0; }
+        .form-imgs img { width: 95%; border-radius: 10px; border: 2px solid #eee; margin-bottom: 10px; }
+
+        /* UI Elements */
+        input, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn { padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.2s; }
         .btn-gold { background: var(--gold); color: white; }
-        .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 5px; }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
-        .tab { flex: 1; text-align: center; line-height: 70px; font-size: 12px; font-weight: bold; color: #999; }
-        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); }
-        .danger-zone { margin-top: 30px; border-top: 2px dashed #ffcdd2; padding-top: 15px; text-align: center; }
+        .btn-out { background: none; border: 1px solid var(--gold); color: var(--gold); margin-top: 8px; }
+
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 75px; z-index: 1000; }
+        .tab { flex: 1; text-align: center; padding: 25px 5px; font-size: 12px; color: #999; font-weight: bold; }
+        .tab.active { color: var(--brown); border-top: 4px solid var(--brown); background: #fffcf5; }
+        .admin-box { margin-top: 40px; border-top: 2px dashed #ffcdd2; padding: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="header">SHANTI JEWEL ERP</div>
+<div class="header">SHANTI JEWEL PRODUCTION</div>
 
+<!-- TAB 1: PUNCH -->
 <div id="addPage" class="page active">
     <div class="card">
-        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="procImgs(e)">
-        <button class="btn btn-gold" onclick="document.getElementById('fIn').click()">📸 ADD PHOTOS</button>
-        <div id="pv" style="display:flex; gap:5px; margin:10px 0;"></div>
+        <div style="border:2px dashed var(--gold); padding:25px; text-align:center; border-radius:10px; cursor:pointer;" onclick="document.getElementById('fIn').click()">
+            <span id="upMsg" style="color:var(--brown); font-weight:bold;">📸 TAP TO ADD DESIGN PHOTOS</span>
+            <div id="pv" style="display:flex; gap:8px; justify-content:center; margin-top:15px;"></div>
+        </div>
+        <input type="file" id="fIn" multiple accept="image/*" style="display:none" onchange="processPhotos(event)">
         
-        <input type="text" id="i_id" placeholder="Order No">
+        <input type="text" id="i_id" placeholder="Order ID (Unique Number)">
         <input type="text" id="i_pa" placeholder="Party Name">
-        <input type="text" id="i_wt" placeholder="Weight (g)">
-        <textarea id="i_sp" placeholder="Instructions"></textarea>
-        <button class="btn btn-gold" style="background:#2e7d32" onclick="save()">SAVE ORDER</button>
+        <input type="text" id="i_wt" placeholder="Gross Weight (g)">
+        <input type="text" id="i_sz" placeholder="Size (Optional)">
+        <textarea id="i_sp" rows="3" placeholder="Production Instructions (Be specific)"></textarea>
+        <button class="btn btn-gold" style="background:#2e7d32" onclick="saveOrder()">PUNCH TO WORKSHOP</button>
     </div>
 
-    <!-- CLEANUP BUTTON -->
-    <div class="danger-zone">
-        <p style="color:red; font-size:12px;">ADMIN: CLEAR ALL RUBBISH DATA</p>
-        <button class="btn" style="background:#ffebee; color:red; border:1px solid red; padding:8px;" onclick="wipeData()">WIPE DATABASE</button>
+    <div class="admin-box">
+        <small style="color:#e53935; display:block; margin-bottom:10px;">MAINTENANCE: DELETE ALL DATABASE RUBBISH</small>
+        <button class="btn" style="background:#fff5f5; color:#d32f2f; border:1px solid #d32f2f; padding:8px; width:auto;" onclick="wipeDatabase()">WIPE ALL DATA</button>
     </div>
 </div>
 
+<!-- TAB 2: WORKFLOW -->
 <div id="listPage" class="page"><div id="mainList"></div></div>
 
+<!-- TAB 3: ALL ORDERS -->
+<div id="infoPage" class="page"><div id="fullInfoList"></div></div>
+
+<!-- HIDDEN CANVAS FOR JPG GENERATION -->
 <div id="formCanvas">
-    <h2 style="text-align:center; color:var(--brown); border-bottom:4px solid var(--gold); padding-bottom:10px;">SHANTI JEWEL</h2>
-    <div id="c_imgs" style="text-align:center; margin:15px 0;"></div>
-    <div style="font-size:22px; line-height:1.6;">
+    <div style="text-align:center; border-bottom:5px solid var(--brown); padding-bottom:15px;">
+        <h1 style="color:var(--brown); margin:0; font-size:45px;">SHANTI JEWEL</h1>
+        <p style="letter-spacing:10px; margin:5px 0; color:var(--gold); font-weight:bold;">PRODUCTION ORDER</p>
+    </div>
+    <div id="c_imgs" class="form-imgs"></div>
+    <div style="font-size:26px; line-height:1.9; color:#222;">
         <b>ORDER ID:</b> #<span id="c_id"></span><br>
         <b>PARTY:</b> <span id="c_pa"></span><br>
-        <b>WEIGHT:</b> <span id="c_wt"></span>g<br>
-        <div style="margin-top:10px; border:1px solid #ddd; padding:10px;">
-            <b>NOTES:</b><br><span id="c_sp"></span>
+        <b>WEIGHT:</b> <span id="c_wt"></span>g | <b>SIZE:</b> <span id="c_sz"></span><br>
+        <div style="margin-top:15px; border:1.5px solid #ccc; padding:15px; border-radius:10px; background:#fdfdfd;">
+            <b>WORKSHOP NOTES:</b><br><span id="c_sp"></span>
         </div>
     </div>
 </div>
@@ -70,9 +90,11 @@
 <div class="tab-bar">
     <div class="tab active" onclick="nav('add', this)">PUNCH</div>
     <div class="tab" onclick="nav('list', this)">PRODUCTION</div>
+    <div class="tab" onclick="nav('info', this)">ALL ORDERS</div>
 </div>
 
 <script>
+    // FIREBASE CONFIGURATION
     const firebaseConfig = {
         apiKey: "AIzaSyBnvmQBPkJmJcjXf71vEUY91B2_2P9oAgU",
         authDomain: "shanti-jewel-order.firebaseapp.com",
@@ -82,11 +104,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const depts = ["CAD", "CAM", "CASTING", "POLISH", "HUID", "READY"];
-    let photos = [];
+    let currentPhotos = [];
 
-    function procImgs(e) {
+    // PHOTO COMPRESSION
+    function processPhotos(e) {
         const files = Array.from(e.target.files).slice(0, 3);
-        photos = []; document.getElementById('pv').innerHTML = "";
+        currentPhotos = [];
+        document.getElementById('pv').innerHTML = "";
         files.forEach(f => {
             const r = new FileReader();
             r.onload = ev => {
@@ -94,38 +118,39 @@
                 img.src = ev.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    canvas.width = 600; canvas.height = (img.height/img.width)*600;
-                    canvas.getContext('2d').drawImage(img,0,0,600,canvas.height);
-                    const res = canvas.toDataURL("image/jpeg", 0.6);
-                    photos.push(res);
-                    document.getElementById('pv').innerHTML += `<img src="${res}" style="width:40px;height:40px;border-radius:4px;">`;
+                    canvas.width = 700; canvas.height = (img.height/img.width)*700;
+                    canvas.getContext('2d').drawImage(img,0,0,700,canvas.height);
+                    const res = canvas.toDataURL("image/jpeg", 0.7);
+                    currentPhotos.push(res);
+                    document.getElementById('pv').innerHTML += `<img src="${res}" style="width:50px;height:50px;border-radius:6px;border:1px solid var(--gold);">`;
                 };
             };
             r.readAsDataURL(f);
         });
+        document.getElementById('upMsg').innerText = files.length + " Photos Selected";
     }
 
-    function save() {
+    // SAVE LOGIC
+    function saveOrder() {
         const id = document.getElementById('i_id').value;
-        if(!id || photos.length === 0) return alert("Order No & Photo Required");
+        if(!id || currentPhotos.length === 0) return alert("Order ID and Photos are mandatory!");
         db.ref('orders/' + id).set({
             id: id, party: document.getElementById('i_pa').value || "-",
             weight: document.getElementById('i_wt').value || "0",
-            specs: document.getElementById('i_sp').value || "None",
-            imgs: photos, status: "CAD", ts: Date.now()
-        }).then(() => { alert("Order Saved!"); location.reload(); });
+            size: document.getElementById('i_sz').value || "-",
+            specs: document.getElementById('i_sp').value || "No special instructions",
+            imgs: currentPhotos, status: "CAD", ts: Date.now()
+        }).then(() => { alert("Order Punched Successfully!"); location.reload(); });
     }
 
-    function wipeData() {
-        const pass = prompt("Enter Admin Password to delete all orders:");
-        if(pass === "1234") {
-            if(confirm("Are you sure? This will delete EVERY order forever.")) {
-                db.ref('orders').remove().then(() => {
-                    alert("Database Cleared!");
-                    location.reload();
-                });
+    // WIPE LOGIC
+    function wipeDatabase() {
+        const p = prompt("ENTER ADMIN PASSWORD TO CLEAR RUBBISH:");
+        if(p === "1234") {
+            if(confirm("DANGER: This will delete ALL orders. Proceed?")) {
+                db.ref('orders').remove().then(() => { alert("Database Empty!"); location.reload(); });
             }
-        } else { alert("Wrong Password!"); }
+        } else { alert("Access Denied."); }
     }
 
     function nav(p, el) {
@@ -133,56 +158,66 @@
         document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
         document.getElementById(p + 'Page').classList.add('active');
         el.classList.add('active');
-        if(p === 'list') load();
+        if(p !== 'add') loadOrders();
     }
 
-    function load() {
+    // RENDER LOGIC
+    function loadOrders() {
         db.ref('orders').on('value', s => {
-            const list = document.getElementById('mainList');
-            list.innerHTML = "";
-            const raw = s.val() || {};
-            const data = Object.values(raw).sort((a,b) => b.ts - a.ts);
+            const sList = document.getElementById('mainList');
+            const iList = document.getElementById('fullInfoList');
+            sList.innerHTML = ""; iList.innerHTML = "";
+            const data = Object.values(s.val() || {}).sort((a,b) => b.ts - a.ts);
+            
             data.forEach(o => {
                 const cur = o.status || "CAD";
-                let steps = depts.map(d => `<div class="s ${cur === d ? 'active' : ''}">${d}</div>`).join('');
-                list.innerHTML += `
+                let steps = depts.map(d => `<div class="step ${cur === d ? 'active' : ''}">${d}</div>`).join('');
+                
+                // Production Card
+                sList.innerHTML += `
                 <div class="card">
-                    <div style="display:flex; gap:10px;">
-                        <img src="${o.imgs ? o.imgs[0] : ''}" style="width:65px; height:65px; object-fit:cover; border-radius:6px;">
-                        <div style="flex:1"><b>#${o.id || 'N/A'}</b> - ${o.party || '-'}<br><small>Dept: ${cur}</small></div>
+                    <div style="display:flex; gap:12px;">
+                        <img src="${o.imgs ? o.imgs[0] : ''}" style="width:75px; height:75px; object-fit:cover; border-radius:8px;">
+                        <div style="flex:1"><b>#${o.id}</b> - ${o.party}<br><small>Current: <b>${cur}</b></small></div>
                     </div>
-                    <div class="flow-box">${steps}</div>
-                    <button class="btn btn-out" onclick="move('${o.id}', '${cur}')">MOVE NEXT ▶</button>
-                    <button class="btn btn-out" style="color:green; border-color:green;" onclick="down('${o.id}')">DOWNLOAD JPG</button>
+                    <div class="flow-container">${steps}</div>
+                    <button class="btn btn-out" style="font-size:12px;" onclick="moveNext('${o.id}', '${cur}')">MOVE TO NEXT DEPARTMENT ▶</button>
+                    <button class="btn btn-out" style="color:#25D366; border-color:#25D366;" onclick="downloadForm('${o.id}')">DOWNLOAD PRODUCTION FORM</button>
                 </div>`;
+
+                // Data Card
+                iList.innerHTML += `<div class="card"><b>#${o.id}</b> | ${o.party}<br>${o.weight}g | ${o.size}<br><small>${o.specs}</small></div>`;
             });
-            window.localData = data;
+            window.activeData = data;
         });
     }
 
-    function move(id, cur) {
+    function moveNext(id, cur) {
         const idx = depts.indexOf(cur);
         if(idx < depts.length - 1) {
             db.ref('orders/' + id).update({ status: depts[idx + 1] });
-        }
+        } else { alert("Order is already Ready!"); }
     }
 
-    function down(id) {
-        const o = window.localData.find(x => x.id === id);
+    // JPG GENERATION
+    function downloadForm(id) {
+        const o = window.activeData.find(x => x.id === id);
         if(!o) return;
         document.getElementById('c_id').innerText = o.id;
         document.getElementById('c_pa').innerText = o.party;
         document.getElementById('c_wt').innerText = o.weight;
+        document.getElementById('c_sz').innerText = o.size;
         document.getElementById('c_sp').innerText = o.specs;
-        document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}" style="width:100%; margin-bottom:10px; border-radius:8px;">`).join('');
+        document.getElementById('c_imgs').innerHTML = o.imgs.map(i => `<img src="${i}">`).join('');
+        
         setTimeout(() => {
             html2canvas(document.querySelector("#formCanvas"), { scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `SJ_${o.id}.jpg`;
+                link.download = `SJ_ORDER_${o.id}.jpg`;
                 link.href = canvas.toDataURL("image/jpeg", 0.9);
                 link.click();
             });
-        }, 600);
+        }, 700);
     }
 </script>
 </body>
